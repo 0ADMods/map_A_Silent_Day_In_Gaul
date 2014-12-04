@@ -1,0 +1,9 @@
+{
+    "name": "map_A_Silent_Day_In_Gaul",
+    "version": "0.0.1",
+    "label": "A Silent Day In Gaul",
+    "url": "N/A",
+    "description": "N/A",
+    "dependencies": ["0ad"],
+    "type": "map"
+}
