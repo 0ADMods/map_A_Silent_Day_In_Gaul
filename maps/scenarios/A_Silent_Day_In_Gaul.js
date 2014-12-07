@@ -24,16 +24,18 @@ E: Outpost Build location
 
 //Add a certain amount of a given resource to a given player
 //@param PlayerID: the ID of the player that receives the resources
-//@param type: Type of resource: "food", "wood", "metal", "stone"
-//@param amount: amount of resources to add. Allows for negative amounts to substract, the final amount doesn't go below zero.
-function AddPlayerResources(PlayerID, type, amount) {
-	var P = TriggerHelper.GetPlayerComponent(PlayerID);
-	var resource = P.GetResourceCounts()[type];
-
-	if ((amount < 0) && (-amount > resource))
-		amount = -resource;
-
-	P.AddResource(type, amount);
+//@param resources: object that holds resource data: var resources = {"food" : 500};
+function AddPlayerResources(PlayerID, resources) {
+	var Player = TriggerHelper.GetPlayerComponent(PlayerID);
+	
+	for(var type in resources) {
+		var resource = Player.GetResourceCounts()[type];
+		
+		if ((resources[type] < 0) && (-resources[type] > resource))
+			resources[type] = -resource;
+		
+		Player.AddResource(type, resources[type]);
+	}
 }
 
 //Post a GUI notification
@@ -286,9 +288,14 @@ Trigger.prototype.FleeToTheEast = function(data) {
 	}
 
 	//Add resources required to build a Civil Center
-	AddPlayerResources(1, "wood", 500);
-	AddPlayerResources(1, "stone", 500);
-	AddPlayerResources(1, "metal", 500);
+
+	this.PlayerID = 1;
+	var resources = {
+		"wood": 500,
+		"stone": 500,
+		"metal": 500
+	};
+	AddPlayerResources(this.PlayerID, resources);
 
 	//spawn reinforcements
 	var spawnPoint = "A";
