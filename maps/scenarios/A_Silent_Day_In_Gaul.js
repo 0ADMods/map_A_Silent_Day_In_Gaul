@@ -1,3 +1,18 @@
+warn("loading the triggers file");
+
+//Debug listeners
+Trigger.prototype.OwnershipChangedAction = function(data)
+{
+	warn("The OnOwnershipChanged event happened with the following data:");
+	warn(uneval(data));
+};
+
+Trigger.prototype.PlayerCommandAction = function(data)
+{
+	warn("The OnPlayerCommand event happened with the following data:");
+	warn(uneval(data));
+};
+
 //Disables the territory decay (for all players)
 TerritoryDecay.prototype.Decay = function() {
 	var cmpHealth = Engine.QueryInterface(this.entity, IID_Health);
@@ -309,13 +324,71 @@ Trigger.prototype.FleeToTheEast = function(data) {
 
 //END OF STORYLINE
 
+
+//========================================= Garrisoning ships and unload at different place
+/*
+Trigger.prototype.GarrisonAndMove = function() {
+	var ent = [258, 259];
+	
+	var cmd = {};
+	cmd.type = "garrison";
+	cmd.target = 260;
+	warn(uneval(cmd.target));
+	//warn(ent[i]);
+	cmd.entities = ent;
+	warn(uneval(cmd.entities));
+	cmd.queued = true;
+	ProcessCommand(0, cmd);
+
+
+
+	var cmd = {};
+
+	for(var target of this.GetTriggerPoints("F")) 		{
+		var cmpPosition = Engine.QueryInterface(target, IID_Position);
+		if (!cmpPosition || !cmpPosition.IsInWorld)
+			continue;
+			// store the x and z coordinates in the command
+		cmd = cmpPosition.GetPosition();
+		break;
+	}
+	cmd.type = "walk";
+	cmd.entities = [260];
+	cmd.queued = true;
+	ProcessCommand(0, cmd);
+
+	var entities = cmpTrigger.GetTriggerPoints("F");
+	var data = {
+		"entities": entities, // central points to calculate the range circles
+		"players": [0], // only count entities of player 1
+		"maxRange": 20,
+		"requiredComponent": IID_UnitAI, // only count units in range
+		"enabled": true,
+	};
+	cmpTrigger.RegisterTrigger("OnRange", "Unload", data);
+
+}
+
+Trigger.prototype.Unload = function(data) {
+	this.DisableTrigger("OnRange", "Unload");
+
+	var cmd = {};
+	cmd.type = "unload-all";
+	cmd.garrisonHolders = [260];
+	cmd.queued = true;
+	ProcessCommand(0, cmd);
+}
+*/
+//========================================= End of Garrisoning and unload at different place
+
 var cmpTrigger = Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger);
+var data = {"enabled": true};
 
 //Arm a number of triggers that are required to run along side the storyline
-cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerOne", {"enabled" : true});
-cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo", {"enabled" : true});
-cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerThree", {"enabled" : true});
-cmpTrigger.RegisterTrigger("OnPlayerCommand", "PlayerCommandHandler", {"enabled" : true});
+cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerOne", data);
+cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo", data);
+cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerThree", data);
+cmpTrigger.RegisterTrigger("OnPlayerCommand", "PlayerCommandHandler", data);
 
 //Start storyline by arming the first OnRange trigger and posting a message 
 var entities = cmpTrigger.GetTriggerPoints("B");
@@ -328,4 +401,3 @@ var data = {
 };
 cmpTrigger.RegisterTrigger("OnRange", "VisitVillage", data);
 
-cmpTrigger.DoAfterDelay(2000, "IntroductionMessage", {});

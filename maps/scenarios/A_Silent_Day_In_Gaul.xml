@@ -33,7 +33,7 @@
 		</Postproc>
 	</Environment>
 	<Camera>
-		<Position x="104.087" y="91.3001" z="20.7318"/>
+		<Position x="211.426" y="164.512" z="102.973"/>
 		<Rotation angle="0"/>
 		<Declination angle="0.610865"/>
 	</Camera>
@@ -1408,8 +1408,8 @@
 		<Entity uid="230">
 			<Template>gaia/fauna_deer</Template>
 			<Player>0</Player>
-			<Position x="184.91367" z="253.75579"/>
-			<Orientation y="2.40598"/>
+			<Position x="172.69336" z="247.78856"/>
+			<Orientation y="-2.08617"/>
 			<Actor seed="10510"/>
 		</Entity>
 		<Entity uid="231">
@@ -1443,15 +1443,15 @@
 		<Entity uid="235">
 			<Template>gaia/fauna_deer</Template>
 			<Player>0</Player>
-			<Position x="354.44428" z="300.70267"/>
-			<Orientation y="1.35155"/>
+			<Position x="357.62705" z="288.3035"/>
+			<Orientation y="-0.76436"/>
 			<Actor seed="14206"/>
 		</Entity>
 		<Entity uid="236">
 			<Template>gaia/fauna_deer</Template>
 			<Player>0</Player>
-			<Position x="249.70206" z="69.42557"/>
-			<Orientation y="2.0049"/>
+			<Position x="251.47764" z="69.57233"/>
+			<Orientation y="-2.4483"/>
 			<Actor seed="3886"/>
 		</Entity>
 		<Entity uid="237">
@@ -1492,15 +1492,15 @@
 		<Entity uid="242">
 			<Template>gaia/fauna_rabbit</Template>
 			<Player>0</Player>
-			<Position x="331.142" z="273.46268"/>
-			<Orientation y="2.35621"/>
+			<Position x="332.45142" z="271.84524"/>
+			<Orientation y="-0.99721"/>
 			<Actor seed="6072"/>
 		</Entity>
 		<Entity uid="243">
 			<Template>gaia/fauna_chicken</Template>
 			<Player>0</Player>
-			<Position x="385.80173" z="203.7268"/>
-			<Orientation y="-0.09723"/>
+			<Position x="392.24054" z="201.54104"/>
+			<Orientation y="1.96897"/>
 			<Actor seed="60106"/>
 		</Entity>
 		<Entity uid="244">
@@ -1513,8 +1513,8 @@
 		<Entity uid="245">
 			<Template>gaia/fauna_chicken</Template>
 			<Player>0</Player>
-			<Position x="394.11066" z="213.11567"/>
-			<Orientation y="-1.50901"/>
+			<Position x="390.20047" z="200.46297"/>
+			<Orientation y="2.83127"/>
 			<Actor seed="58550"/>
 		</Entity>
 		<Entity uid="246">
@@ -1586,6 +1586,34 @@
 			<Position x="351.50556" z="281.1901"/>
 			<Orientation y="0.0064"/>
 			<Actor seed="23856"/>
+		</Entity>
+		<Entity uid="258">
+			<Template>units/gaul_infantry_javelinist_b</Template>
+			<Player>1</Player>
+			<Position x="109.13105" z="371.02222"/>
+			<Orientation y="2.35621"/>
+			<Actor seed="62026"/>
+		</Entity>
+		<Entity uid="259">
+			<Template>units/gaul_infantry_javelinist_b</Template>
+			<Player>1</Player>
+			<Position x="113.74213" z="373.8343"/>
+			<Orientation y="-2.16587"/>
+			<Actor seed="19988"/>
+		</Entity>
+		<Entity uid="260">
+			<Template>units/gaul_ship_trireme</Template>
+			<Player>1</Player>
+			<Position x="127.8605" z="350.21415"/>
+			<Orientation y="-0.58767"/>
+			<Actor seed="27766"/>
+		</Entity>
+		<Entity uid="261">
+			<Template>special/trigger_point_F</Template>
+			<Player>0</Player>
+			<Position x="82.01018" z="295.96454"/>
+			<Orientation y="2.35621"/>
+			<Actor seed="346"/>
 		</Entity>
 	</Entities>
 	<Paths/>
