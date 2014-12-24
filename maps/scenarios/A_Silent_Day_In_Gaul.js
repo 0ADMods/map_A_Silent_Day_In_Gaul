@@ -56,17 +56,10 @@ function AddPlayerResources(PlayerID, resources) {
 //Post a GUI notification
 //@param players: Array of playerIDs to post the message to
 //@param message: the to be posted message in a String
-function PushGUINotification(players, message) {
-	if (!players || !message || message == "")
-		return;
-	
+function GUINotification(players, message) {
 	var cmpGUIInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface);
-
-	var recipients =  players;
-	if (!players.length)
-		recipients = [players];
 	cmpGUIInterface.PushNotification({
-		"players": recipients, 
+		"players": players, 
 		"message": message,
 		translateMessage: true
 	});
