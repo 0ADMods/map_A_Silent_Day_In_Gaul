@@ -313,8 +313,8 @@ Trigger.prototype.FanaticRaid = function() {
 	var entities = cmpRangeManager.GetEntitiesByPlayer(this.playerID);
 
 	var cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
-	var template = cmpTemplateManager.GetCurrentTemplateName(data["building"]);
 	var units = [];
+	
 	for(var ent of entities) {
 		var template = cmpTemplateManager.GetCurrentTemplateName(ent);
 			if (template == "units/gaul_champion_fanatic")
