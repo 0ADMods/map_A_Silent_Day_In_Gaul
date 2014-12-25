@@ -1,18 +1,5 @@
 warn("loading the triggers file");
 
-//Debug listeners
-Trigger.prototype.OwnershipChangedAction = function(data)
-{
-	warn("The OnOwnershipChanged event happened with the following data:");
-	warn(uneval(data));
-};
-
-Trigger.prototype.PlayerCommandAction = function(data)
-{
-	warn("The OnPlayerCommand event happened with the following data:");
-	warn(uneval(data));
-};
-
 //Disables the territory decay (for all players)
 TerritoryDecay.prototype.Decay = function() {
 	var cmpHealth = Engine.QueryInterface(this.entity, IID_Health);
@@ -74,7 +61,7 @@ Trigger.prototype.DefeatConditionsPlayerOne = function(data) {
 	var P = TriggerHelper.GetPlayerComponent(1);
 	if (P.GetPopulationCount() == 0) {
 		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerOne");
-		PushGUINotification([1], markForTranslation("Shame on you! You've been killed!"));
+		GUINotification([1], markForTranslation("Shame on you! You've been killed!"));
 		TriggerHelper.DefeatPlayer(1);
 	}
 };
@@ -83,7 +70,7 @@ Trigger.prototype.DefeatConditionsPlayerTwo = function(data) {
 	var P = TriggerHelper.GetPlayerComponent(2);
 	if (P.GetPopulationCount() == 0) {
 		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo");
-		PushGUINotification([1], markForTranslation("Avenge us! Kill all the enemy bandits!"));
+		GUINotification([1], markForTranslation("Avenge us! Kill all the enemy bandits!"));
 		TriggerHelper.DefeatPlayer(2);
 	}
 };
@@ -92,7 +79,7 @@ Trigger.prototype.DefeatConditionsPlayerThree = function(data) {
 	var P = TriggerHelper.GetPlayerComponent(3);
 	if (P.GetPopulationCount() == 0) {
 		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerThree");
-		PushGUINotification([1], markForTranslation("Well done! You've killed all the bandits!"));
+		GUINotification([1], markForTranslation("Well done! You've killed all the bandits!"));
 		TriggerHelper.DefeatPlayer(3);
 		TriggerHelper.SetPlayerWon(1);
 	}
@@ -112,7 +99,7 @@ Trigger.prototype.PlayerCommandHandler = function(data) {
 //MESSAGES AND DIALOGUES
 
 Trigger.prototype.IntroductionMessage = function() {
-    PushGUINotification([1], markForTranslation("Visit the Elder in the Village to the East."));
+    GUINotification([1], markForTranslation("Visit the Elder in the Village to the East."));
 };
 
 Trigger.prototype.VisitVillageDialog = function() {
@@ -153,22 +140,29 @@ Trigger.prototype.VisitVillageDialog = function() {
 };
 
 Trigger.prototype.VisitVillageMessage = function() {
-    PushGUINotification([1], markForTranslation("Very good! I love that eagerness! I have a task for you: I need you to rebuild the old Outpost to the Northwest of here. Good luck."));
+    GUINotification([1], markForTranslation("Very good! I love that eagerness! I have a task for you: I need you to rebuild the old Outpost to the Northwest of here. Good luck."));
 
 	//Add resources required to build an Outpost
-	AddPlayerResources(1, "wood", 80);
+	var resources = {
+		"wood": 80,
+	};
+	AddPlayerResources(1, resources);
 };
 
 Trigger.prototype.BuildOutpostMessage = function() {
-    PushGUINotification([1], markForTranslation("This should be the place. Let's build that Outpost!"));
+    GUINotification([1], markForTranslation("This should be the place. Let's build that Outpost!"));
 };
 
 Trigger.prototype.FlyAwayMessage = function() {
-    PushGUINotification([1], markForTranslation("Elder: Bandits are attacking our village! Hurry Away to the East, the way you came from! You wouldn't survive a minute"));
+    GUINotification([1], markForTranslation("Elder: Bandits are attacking our village! Hurry Away to the West, the way you came from! You won't survive a minute!"));
 };
 
 Trigger.prototype.ReinforcementsMessage = function() {
-    PushGUINotification([1], markForTranslation("Gaul Warrior: Let's teach those Bandits a lesson! Our scouts reported that there main camp is located to the south. Maybe we can find a path leading from the road to their camp. Also we shouldn't forget to kill the attackers that should be somewhere nearby the village."));
+    GUINotification([1], markForTranslation("Gaul Warrior: Let's teach those Bandits a lesson! Our scouts reported that there main camp is located to the south. Maybe we can find a path leading from the road to their camp. But let us build a Civil Center first!"));
+};
+
+Trigger.prototype.RaidMessage = function() {
+    GUINotification([1], markForTranslation("Gaul Warrior: Beware! Enemies are upon us!"));
 };
 
 //END OF MESSAGES AND DIALOGUES
@@ -194,11 +188,10 @@ Trigger.prototype.VisitVillage = function(data) {
 };
 
 Trigger.prototype.BuildOutpost = function(data) {
-	this.DoAfterDelay(200, "BuildOutpostMessage", {});
-
 	//disable current trigger, the next is already registered in VisitVillage (as this trigger is only posting info and doesn't have an impact on the gameplay 
-		// exept informing the player of the build position)
+		// except informing the player of the build position)
 	this.DisableTrigger("OnRange", "BuildOutpost");
+	this.DoAfterDelay(200, "BuildOutpostMessage", {});
 };
 
 Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
@@ -219,7 +212,7 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerThree");
 
 		this.DisableTrigger("OnStructureBuilt", "SpawnAndAttackAlliedVillage");
-		PushGUINotification([1], markForTranslation("Elder: Aren't you even capable of building an Outpost!? Shame on you, go and return to your father!"));
+		GUINotification([1], markForTranslation("Elder: Aren't you even capable of building an Outpost!? Shame on you, go and return to your father!"));
 		TriggerHelper.DefeatPlayer(1);
 		return;
 	}
@@ -231,7 +224,7 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerThree");
 
 		this.DisableTrigger("OnStructureBuilt", "SpawnAndAttackAlliedVillage");
-		PushGUINotification([1], markForTranslation("Elder: How can we use this Outpost if you didn't build it at the right place? Go and return to your father, I can't learn you anything!"));
+		GUINotification([1], markForTranslation("Elder: How can we use this Outpost if you didn't build it at the right place? Go and return to your father, I can't learn you anything!"));
 		TriggerHelper.DefeatPlayer(1);
 		return;
 	}
@@ -246,7 +239,7 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 	for (var origin in intruders) {
 		var cmd = null;
 
-		for(var target of this.GetTriggerPoints("B")) 		{
+		for(var target of this.GetTriggerPoints("B")) {
 			var cmpPosition = Engine.QueryInterface(target, IID_Position);
 			if (!cmpPosition || !cmpPosition.IsInWorld)
 				continue;
@@ -279,10 +272,11 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 
 Trigger.prototype.FleeToTheEast = function(data) {
 	this.DisableTrigger("OnRange", "FleeToTheEast");
+	this.PlayerID = 1;
 
 	var cmpPlayerManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager);
-	var playerEnt = cmpPlayerManager.GetPlayerByID(1);
 
+	var playerEnt = cmpPlayerManager.GetPlayerByID(this.PlayerID);
 	var technames = ["phase_town_generic", "phase_city_gauls"];
 
 	var cmpTechnologyManager = Engine.QueryInterface(playerEnt, IID_TechnologyManager); 
@@ -291,13 +285,12 @@ Trigger.prototype.FleeToTheEast = function(data) {
 		var template = cmpTechnologyManager.GetTechnologyTemplate(technames[i]);
 
 		// check, if technology is already researched
-		if (!cmpTechnologyManager.IsTechnologyResearched(technames[i]))
+		if (!cmpTechnologyManager.IsTechnologyResearched(technames[i])) {
 			cmpTechnologyManager.ResearchTechnology(technames[i]); 
+		}
 	}
 
 	//Add resources required to build a Civil Center
-
-	this.PlayerID = 1;
 	var resources = {
 		"wood": 500,
 		"stone": 500,
@@ -313,31 +306,26 @@ Trigger.prototype.FleeToTheEast = function(data) {
 	var intruders = TriggerHelper.SpawnUnitsFromTriggerPoints(spawnPoint, "units/gaul_champion_infantry", this.attackSize, this.PlayerID);
 
 	this.DoAfterDelay(200, "ReinforcementsMessage", {});
+	this.DoAfterDelay(60000, "FanaticRaid", {}); //Attack after 60 seconds
 };
 
-//END OF STORYLINE
+Trigger.prototype.FanaticRaid = function() {
+	this.playerID = 3;
+	var cmpRangeManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_RangeManager);
+	var entities = cmpRangeManager.GetEntitiesByPlayer(this.playerID);
 
+	var cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
+	var template = cmpTemplateManager.GetCurrentTemplateName(data["building"]);
+	var units = [];
+	for(var ent of entities) {
+		var template = cmpTemplateManager.GetCurrentTemplateName(ent);
+			if (template == "units/gaul_champion_fanatic")
+				units.push(ent);
+	}
 
-//========================================= Garrisoning ships and unload at different place
-/*
-Trigger.prototype.GarrisonAndMove = function() {
-	var ent = [258, 259];
-	
-	var cmd = {};
-	cmd.type = "garrison";
-	cmd.target = 260;
-	warn(uneval(cmd.target));
-	//warn(ent[i]);
-	cmd.entities = ent;
-	warn(uneval(cmd.entities));
-	cmd.queued = true;
-	ProcessCommand(0, cmd);
+	var cmd = null;
 
-
-
-	var cmd = {};
-
-	for(var target of this.GetTriggerPoints("F")) 		{
+	for(var target of this.GetTriggerPoints("A")) 		{
 		var cmpPosition = Engine.QueryInterface(target, IID_Position);
 		if (!cmpPosition || !cmpPosition.IsInWorld)
 			continue;
@@ -345,34 +333,15 @@ Trigger.prototype.GarrisonAndMove = function() {
 		cmd = cmpPosition.GetPosition();
 		break;
 	}
-	cmd.type = "walk";
-	cmd.entities = [260];
+	cmd.type = "attack-walk";
+	cmd.entities = units;
+	cmd.targetClasses = { "attack": ["Unit", "Structure"] };
 	cmd.queued = true;
-	ProcessCommand(0, cmd);
+	ProcessCommand(3, cmd);
+	this.DoAfterDelay(3000, "RaidMessage", {});
+};
 
-	var entities = cmpTrigger.GetTriggerPoints("F");
-	var data = {
-		"entities": entities, // central points to calculate the range circles
-		"players": [0], // only count entities of player 1
-		"maxRange": 20,
-		"requiredComponent": IID_UnitAI, // only count units in range
-		"enabled": true,
-	};
-	cmpTrigger.RegisterTrigger("OnRange", "Unload", data);
-
-}
-
-Trigger.prototype.Unload = function(data) {
-	this.DisableTrigger("OnRange", "Unload");
-
-	var cmd = {};
-	cmd.type = "unload-all";
-	cmd.garrisonHolders = [260];
-	cmd.queued = true;
-	ProcessCommand(0, cmd);
-}
-*/
-//========================================= End of Garrisoning and unload at different place
+//END OF STORYLINE
 
 var cmpTrigger = Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger);
 var data = {"enabled": true};
@@ -393,4 +362,3 @@ var data = {
 	"enabled": true,
 };
 cmpTrigger.RegisterTrigger("OnRange", "VisitVillage", data);
-
