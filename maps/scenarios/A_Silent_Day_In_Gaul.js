@@ -1,5 +1,3 @@
-warn("loading the triggers file");
-
 //Disables the territory decay (for all players)
 TerritoryDecay.prototype.Decay = function() {
 	var cmpHealth = Engine.QueryInterface(this.entity, IID_Health);
