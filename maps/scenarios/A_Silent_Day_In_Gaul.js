@@ -9,22 +9,23 @@ TerritoryDecay.prototype.Decay = function() {
 	cmpHealth.Reduce(Math.round(decayRate));
 };
 
-//TRIGGERPOINTS:
-/*
-A: Spawn for Reinforcements after Red village Destroyed.
-B: Red Village.
-C: Bandit Spawnpoint.
-D: Bandit Camp.
-E: Outpost Build location
-*/
+/* TRIGGERPOINTS:
+ * A: Spawn for Reinforcements after Red village Destroyed
+ * B: Red Village
+ * C: Bandit Spawnpoint
+ * D: Bandit Camp
+ * E: Outpost Build location
+ * F: Bandit reinforcements
+ */
 
 //END OF TRIGGERPOINTS
 
 //FUNCTIONS
 
-//Add a certain amount of a given resource to a given player
-//@param PlayerID: the ID of the player that receives the resources
-//@param resources: object that holds resource data: var resources = {"food" : 500};
+/* Add a certain amount of a given resource to a given player
+ * @param PlayerID: the ID of the player that receives the resources
+ * @param resources: object that holds resource data: var resources = {"food" : 500};
+ */
 function AddPlayerResources(PlayerID, resources) {
 	var Player = TriggerHelper.GetPlayerComponent(PlayerID);
 	
@@ -38,9 +39,10 @@ function AddPlayerResources(PlayerID, resources) {
 	}
 }
 
-//Post a GUI notification
-//@param players: Array of playerIDs to post the message to
-//@param message: the to be posted message in a String
+/* Post a GUI notification
+ * @param players: Array of playerIDs to post the message to
+ * @param message: the to be posted message in a String
+ */
 function GUINotification(players, message) {
 	var cmpGUIInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface);
 	cmpGUIInterface.PushNotification({
@@ -54,17 +56,52 @@ function GUINotification(players, message) {
 
 //DEFEATCONDITIONS
 
-//Check for populations and mark the corresponding player as defeated if it is zero
-Trigger.prototype.DefeatConditionsPlayerOne = function(data) {
-	var P = TriggerHelper.GetPlayerComponent(1);
-	if (P.GetPopulationCount() == 0) {
-		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerOne");
-		GUINotification([1], markForTranslation("Shame on you! You've been killed!"));
-		TriggerHelper.DefeatPlayer(1);
+/*
+ * Check players the next turn. Avoids problems in Atlas, with promoting entities etc
+ */
+Trigger.prototype.CheckDefeatConditions = function()
+{
+	if (this.checkingConquestCriticalEntities)
+		return;
+	// wait a turn for actually checking the players
+	this.DoAfterDelay(0, "DefeatConditionsPlayerOneAndThree", null);
+	this.DoAfterDelay(0, "DefeatConditionsPlayerTwo", null);
+	this.checkingConquestCriticalEntities = true;
+};
+
+
+//Modified version of the Conquest game type to allow for a cumstomized defeatcondition of Player 2 and some other niceties
+Trigger.prototype.DefeatConditionsPlayerOneAndThree = function(data) {
+	this.checkingConquestCriticalEntities = false;
+	
+	var PlayerIDs = [1, 3];
+	var playerEnt = [];
+
+	for (var i = 0; i < PlayerIDs.length; i++) {
+		var cmpPlayerManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager);
+		
+		// If the player is currently active but needs to be defeated,
+		// mark that player as defeated
+
+		var playerEntityId = cmpPlayerManager.GetPlayerByID(PlayerIDs[i]);
+		playerEnt[i] = Engine.QueryInterface(playerEntityId, IID_Player);
+		if (playerEnt[i].GetState() != "active") 
+			return;
+		if (playerEnt[i].GetConquestCriticalEntitiesCount() == 0) {
+			TriggerHelper.DefeatPlayer(PlayerIDs[i]);
+			if (PlayerIDs[i] == 1) {
+				GUINotification([1], markForTranslation("Shame on you! Now the bandits can do whatever they like! Nothing can stop them now!"));
+			} else if (PlayerIDs[i] == 3) {
+				GUINotification([1], markForTranslation("Well done! You've killed all the bandits!"));
+				TriggerHelper.SetPlayerWon(1);
+			}
+		}
 	}
 };
 
 Trigger.prototype.DefeatConditionsPlayerTwo = function(data) {
+	this.checkingConquestCriticalEntities = false;
+
 	var P = TriggerHelper.GetPlayerComponent(2);
 	if (P.GetPopulationCount() == 0) {
 		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo");
@@ -73,21 +110,12 @@ Trigger.prototype.DefeatConditionsPlayerTwo = function(data) {
 	}
 };
 
-Trigger.prototype.DefeatConditionsPlayerThree = function(data) {
-	var P = TriggerHelper.GetPlayerComponent(3);
-	if (P.GetPopulationCount() == 0) {
-		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerThree");
-		GUINotification([1], markForTranslation("Well done! You've killed all the bandits!"));
-		TriggerHelper.DefeatPlayer(3);
-		TriggerHelper.SetPlayerWon(1);
-	}
-};
-
 //END OF DEFEATCONDITIONS
 
 //PLAYER COMMAND LISTENER
 
 Trigger.prototype.PlayerCommandHandler = function(data) {
+	//check for the dialog response
 	if ((data.cmd.type == "dialog-answer") && (data.cmd.answer == "button1" || "button2"))
 		this.DoAfterDelay(1000, "VisitVillageMessage", {});
 };
@@ -97,7 +125,7 @@ Trigger.prototype.PlayerCommandHandler = function(data) {
 //MESSAGES AND DIALOGUES
 
 Trigger.prototype.IntroductionMessage = function() {
-    GUINotification([1], markForTranslation("Visit the Elder in the Village to the East."));
+	GUINotification([1], markForTranslation("Visit the Elder in the Village to the East."));
 };
 
 Trigger.prototype.VisitVillageDialog = function() {
@@ -138,7 +166,7 @@ Trigger.prototype.VisitVillageDialog = function() {
 };
 
 Trigger.prototype.VisitVillageMessage = function() {
-    GUINotification([1], markForTranslation("Very good! I love that eagerness! I have a task for you: I need you to rebuild the old Outpost to the Northwest of here. Good luck."));
+	GUINotification([1], markForTranslation("Very good! I love that eagerness! I have a task for you: I need you to rebuild the old Outpost to the West of here. We need it to signal to other tribes. Good luck."));
 
 	//Add resources required to build an Outpost
 	var resources = {
@@ -148,30 +176,55 @@ Trigger.prototype.VisitVillageMessage = function() {
 };
 
 Trigger.prototype.BuildOutpostMessage = function() {
-    GUINotification([1], markForTranslation("This should be the place. Let's build that Outpost!"));
+	GUINotification([1], markForTranslation("This should be the place. Let's build that Outpost!"));
+};
+
+Trigger.prototype.BuildOutpostWrongTypeMessage = function() {
+	GUINotification([1], markForTranslation("Elder: Aren't you even capable of building an Outpost!? Shame on you, go and return to your father!"));
+};
+
+Trigger.prototype.BuildOutpostWrongPlaceMessage = function() {
+	GUINotification([1], markForTranslation("Elder: How can we use this Outpost if you didn't build it at the right place? Go and return to your father, I can't learn you anything!"));
 };
 
 Trigger.prototype.FlyAwayMessage = function() {
-    GUINotification([1], markForTranslation("Elder: Bandits are attacking our village! Hurry Away to the West, the way you came from! You won't survive a minute!"));
+	GUINotification([1], markForTranslation("Elder: Bandits are attacking our village! Hurry Away to the West, the way you came from! You won't survive a minute!"));
 };
 
 Trigger.prototype.ReinforcementsMessage = function() {
-    GUINotification([1], markForTranslation("Gaul Warrior: Let's teach those Bandits a lesson! Our scouts reported that there main camp is located to the south. Maybe we can find a path leading from the road to their camp. But let us build a Civil Center first!"));
+	GUINotification([1], markForTranslation("Gaul Warrior: Let's teach those Bandits a lesson! Our scouts reported that there main camp is located to the south. Maybe we can find a path leading from the road to their camp. But let us build a Civil Center first!"));
 };
 
-Trigger.prototype.RaidMessage = function() {
-    GUINotification([1], markForTranslation("Gaul Warrior: Beware! Enemies are upon us!"));
+Trigger.prototype.FanaticRaidMessage = function() {
+	GUINotification([1], markForTranslation("Gaul Warrior: Beware! Enemies are upon us!"));
+};
+
+Trigger.prototype.DefeatPlayerOneMessage = function() {
+	GUINotification([1], markForTranslation("Shame on you! Now the bandits can do whatever they like! Nothing can stop them now!"));
+};
+
+Trigger.prototype.DefeatPlayerTwoMessage = function() {
+	GUINotification([1], markForTranslation("Avenge us! Kill all the enemy bandits!"));
+};
+
+Trigger.prototype.DefeatPlayerThreeMessage = function() {
+	GUINotification([1], markForTranslation("Well done! You've killed all the bandits!"));
 };
 
 //END OF MESSAGES AND DIALOGUES
 
 //STORYLINE (IN SEQUENCE)
 
-//This function fires a dialog as soon as the player comes in range of the Triggerpoint located in the Red Village. After this dialog, this trigger is disabled and the BuildOutpost trigger enabled.
+/* This function fires a dialog as soon as the player comes in range of the Triggerpoint located in the Red Village. 
+ * After this dialog, this trigger is disabled and the BuildOutpost trigger enabled.
+ */
 Trigger.prototype.VisitVillage = function(data) {
+	//disable current trigger, execute commands and enable the next trigger(s)
+	this.DisableTrigger("OnRange", "VisitVillage");
+	
+	//small delay for GUI notifications to prevent too quick responses/reactions (technically not necessary but is more relaxed)
 	this.DoAfterDelay(200, "VisitVillageDialog", {});
-
-	//enable next trigger and disable current
+	
 	var entities = cmpTrigger.GetTriggerPoints("E");
 	data = {
 		"entities": entities, // central points to calculate the range circles
@@ -180,22 +233,24 @@ Trigger.prototype.VisitVillage = function(data) {
 		"requiredComponent": IID_UnitAI, // only count units in range
 		"enabled": true,
 	};
-	cmpTrigger.RegisterTrigger("OnRange", "BuildOutpost", data);
+	this.RegisterTrigger("OnRange", "BuildOutpost", data);
+
 	this.RegisterTrigger("OnStructureBuilt", "SpawnAndAttackAlliedVillage", {"enabled" : true});
-	this.DisableTrigger("OnRange", "VisitVillage");
 };
 
 Trigger.prototype.BuildOutpost = function(data) {
-	//disable current trigger, the next is already registered in VisitVillage (as this trigger is only posting info and doesn't have an impact on the gameplay 
-		// except informing the player of the build position)
+/* disable current trigger, the next is already registered in the last trigger (VisitVillage) (as this trigger is only posting info and doesn't have an impact on the gameplay 
+ * except informing the player of the build position)
+ */
 	this.DisableTrigger("OnRange", "BuildOutpost");
+
 	this.DoAfterDelay(200, "BuildOutpostMessage", {});
 };
 
 Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 	this.DisableTrigger("OnStructureBuilt", "SpawnAndAttackAlliedVillage");
 
-	//check if the player has built the correct building and at the right place
+	//check if the player has built the correct building and at the right place, player loses if that isn't the case
 	var cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
 	var template = cmpTemplateManager.GetCurrentTemplateName(data["building"]);
 
@@ -209,8 +264,7 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo");
 		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerThree");
 
-		this.DisableTrigger("OnStructureBuilt", "SpawnAndAttackAlliedVillage");
-		GUINotification([1], markForTranslation("Elder: Aren't you even capable of building an Outpost!? Shame on you, go and return to your father!"));
+		this.DoAfterDelay(0, "BuildOutpostWrongTypeMessage", {});
 		TriggerHelper.DefeatPlayer(1);
 		return;
 	}
@@ -221,8 +275,7 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo");
 		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerThree");
 
-		this.DisableTrigger("OnStructureBuilt", "SpawnAndAttackAlliedVillage");
-		GUINotification([1], markForTranslation("Elder: How can we use this Outpost if you didn't build it at the right place? Go and return to your father, I can't learn you anything!"));
+		this.DoAfterDelay(0, "BuildOutpostWrongPlaceMessage", {});
 		TriggerHelper.DefeatPlayer(1);
 		return;
 	}
@@ -256,7 +309,6 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 
 	this.DoAfterDelay(5000, "FlyAwayMessage", {});
 
-	//enable next trigger and disable current
 	var entities = cmpTrigger.GetTriggerPoints("A");
 	data = {
 		"entities": entities, // central points to calculate the range circles
@@ -274,15 +326,15 @@ Trigger.prototype.FleeToTheEast = function(data) {
 
 	var cmpPlayerManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager);
 
-	var playerEnt = cmpPlayerManager.GetPlayerByID(this.PlayerID);
+	var playerEntityId = cmpPlayerManager.GetPlayerByID(this.PlayerID);
 	var technames = ["phase_town_generic", "phase_city_gauls"];
 
-	var cmpTechnologyManager = Engine.QueryInterface(playerEnt, IID_TechnologyManager); 
+	var cmpTechnologyManager = Engine.QueryInterface(playerEntityId, IID_TechnologyManager); 
 
 	for(var i = 0; i < technames.length; i++) {
 		var template = cmpTechnologyManager.GetTechnologyTemplate(technames[i]);
 
-		// check, if technology is already researched
+		// check if technology is already researched (accidentaly)
 		if (!cmpTechnologyManager.IsTechnologyResearched(technames[i])) {
 			cmpTechnologyManager.ResearchTechnology(technames[i]); 
 		}
@@ -336,7 +388,8 @@ Trigger.prototype.FanaticRaid = function() {
 	cmd.targetClasses = { "attack": ["Unit", "Structure"] };
 	cmd.queued = true;
 	ProcessCommand(3, cmd);
-	this.DoAfterDelay(3000, "RaidMessage", {});
+
+	this.DoAfterDelay(3000, "FanaticRaidMessage", {}); //3 seconds delay for the 'surprise-effect'
 };
 
 //END OF STORYLINE
@@ -345,9 +398,7 @@ var cmpTrigger = Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger);
 var data = {"enabled": true};
 
 //Arm a number of triggers that are required to run along side the storyline
-cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerOne", data);
-cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo", data);
-cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerThree", data);
+cmpTrigger.RegisterTrigger("OnOwnershipChanged", "CheckDefeatConditions", data);
 cmpTrigger.RegisterTrigger("OnPlayerCommand", "PlayerCommandHandler", data);
 
 //Start storyline by arming the first OnRange trigger and posting a message 
