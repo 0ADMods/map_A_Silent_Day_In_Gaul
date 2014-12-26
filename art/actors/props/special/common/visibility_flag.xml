@@ -7,6 +7,9 @@
         <animation file="mechanical/waypoint_flag_idle.dae" name="Idle" speed="30"/>
       </animations>
       <mesh>props/waypoint_flag.dae</mesh>
+      <props>
+        <prop actor="props/structures/decals/dirt_flag.xml" attachpoint="root"/>
+      </props>
     </variant>
   </group>
   <group>
