@@ -27,15 +27,15 @@ TerritoryDecay.prototype.Decay = function() {
  * @param resources: object that holds resource data: var resources = {"food" : 500};
  */
 function AddPlayerResources(PlayerID, resources) {
-	var Player = TriggerHelper.GetPlayerComponent(PlayerID);
+	var cmpPlayer = TriggerHelper.GetPlayerComponent(PlayerID);
 	
 	for(var type in resources) {
-		var resource = Player.GetResourceCounts()[type];
+		var resource = cmpPlayer.GetResourceCounts()[type];
 		
 		if ((resources[type] < 0) && (-resources[type] > resource))
 			resources[type] = -resource;
 		
-		Player.AddResource(type, resources[type]);
+		cmpPlayer.AddResource(type, resources[type]);
 	}
 }
 
@@ -71,11 +71,11 @@ Trigger.prototype.CheckDefeatConditions = function()
 
 
 //Modified version of the Conquest game type to allow for a cumstomized defeatcondition of Player 2 and some other niceties
-Trigger.prototype.DefeatConditionsPlayerOneAndThree = function(data) {
+Trigger.prototype.DefeatConditionsPlayerOneAndThree = function() {
 	this.checkingConquestCriticalEntities = false;
 	
 	var PlayerIDs = [1, 3];
-	var playerEnt = [];
+	var PlayerEnt = [];
 
 	for (var i = 0; i < PlayerIDs.length; i++) {
 		var cmpPlayerManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager);
@@ -83,11 +83,11 @@ Trigger.prototype.DefeatConditionsPlayerOneAndThree = function(data) {
 		// If the player is currently active but needs to be defeated,
 		// mark that player as defeated
 
-		var playerEntityId = cmpPlayerManager.GetPlayerByID(PlayerIDs[i]);
-		playerEnt[i] = Engine.QueryInterface(playerEntityId, IID_Player);
-		if (playerEnt[i].GetState() != "active") 
+		var PlayerEntityId = cmpPlayerManager.GetPlayerByID(PlayerIDs[i]);
+		PlayerEnt[i] = Engine.QueryInterface(PlayerEntityId, IID_Player);
+		if (PlayerEnt[i].GetState() != "active") 
 			return;
-		if (playerEnt[i].GetConquestCriticalEntitiesCount() == 0) {
+		if (PlayerEnt[i].GetConquestCriticalEntitiesCount() == 0) {
 			TriggerHelper.DefeatPlayer(PlayerIDs[i]);
 			if (PlayerIDs[i] == 1) {
 				GUINotification([1], markForTranslation("Shame on you! Now the bandits can do whatever they like! Nothing can stop them now!"));
@@ -99,11 +99,11 @@ Trigger.prototype.DefeatConditionsPlayerOneAndThree = function(data) {
 	}
 };
 
-Trigger.prototype.DefeatConditionsPlayerTwo = function(data) {
+Trigger.prototype.DefeatConditionsPlayerTwo = function() {
 	this.checkingConquestCriticalEntities = false;
 
-	var P = TriggerHelper.GetPlayerComponent(2);
-	if (P.GetPopulationCount() == 0) {
+	var cmpPlayer = TriggerHelper.GetPlayerComponent(2);
+	if (cmpPlayer.GetPopulationCount() == 0) {
 		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo");
 		GUINotification([1], markForTranslation("Avenge us! Kill all the enemy bandits!"));
 		TriggerHelper.DefeatPlayer(2);
@@ -250,19 +250,17 @@ Trigger.prototype.BuildOutpost = function(data) {
 Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 	this.DisableTrigger("OnStructureBuilt", "SpawnAndAttackAlliedVillage");
 
-	//check if the player has built the correct building and at the right place, player loses if that isn't the case
-	var cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
-	var template = cmpTemplateManager.GetCurrentTemplateName(data["building"]);
-
+	//check if the player has built the correct building and at the right place, player 1 loses if that isn't the case
 	var entity1 = data["building"];
 	var entity2 = this.GetTriggerPoints("E")[0];
 	var distance = DistanceBetweenEntities(entity1, entity2);
 
+	var cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
+	var template = cmpTemplateManager.GetCurrentTemplateName(entity1);
+
 	if (template != "structures/gaul_outpost") {
-		//disable all defeat conditions
-		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerOne");
-		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo");
-		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerThree");
+		//disable defeat conditions
+		this.DisableTrigger("OnOwnershipChanged", "CheckDefeatConditions");
 
 		this.DoAfterDelay(0, "BuildOutpostWrongTypeMessage", {});
 		TriggerHelper.DefeatPlayer(1);
@@ -270,10 +268,8 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 	}
 
 	if (distance > 30) {
-		//disable all defeat conditions
-		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerOne");
-		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo");
-		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerThree");
+		//disable defeat conditions
+		this.DisableTrigger("OnOwnershipChanged", "CheckDefeatConditions");
 
 		this.DoAfterDelay(0, "BuildOutpostWrongPlaceMessage", {});
 		TriggerHelper.DefeatPlayer(1);
@@ -326,14 +322,12 @@ Trigger.prototype.FleeToTheEast = function(data) {
 
 	var cmpPlayerManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager);
 
-	var playerEntityId = cmpPlayerManager.GetPlayerByID(this.PlayerID);
+	var PlayerEntityId = cmpPlayerManager.GetPlayerByID(this.PlayerID);
 	var technames = ["phase_town_generic", "phase_city_gauls"];
 
-	var cmpTechnologyManager = Engine.QueryInterface(playerEntityId, IID_TechnologyManager); 
+	var cmpTechnologyManager = Engine.QueryInterface(PlayerEntityId, IID_TechnologyManager); 
 
 	for(var i = 0; i < technames.length; i++) {
-		var template = cmpTechnologyManager.GetTechnologyTemplate(technames[i]);
-
 		// check if technology is already researched (accidentaly)
 		if (!cmpTechnologyManager.IsTechnologyResearched(technames[i])) {
 			cmpTechnologyManager.ResearchTechnology(technames[i]); 
@@ -369,8 +363,8 @@ Trigger.prototype.FanaticRaid = function() {
 	
 	for(var ent of entities) {
 		var template = cmpTemplateManager.GetCurrentTemplateName(ent);
-			if (template == "units/gaul_champion_fanatic")
-				units.push(ent);
+		if (template == "units/gaul_champion_fanatic")
+			units.push(ent);
 	}
 
 	var cmd = null;
