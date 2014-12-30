@@ -90,7 +90,7 @@ Trigger.prototype.DefeatConditionsPlayerOneAndThree = function() {
 Trigger.prototype.DefeatConditionsPlayerTwo = function() {
 	var cmpPlayer = TriggerHelper.GetPlayerComponent(2);
 	if (cmpPlayer.GetState() != "active") 
-		continue;	
+		return;	
 	if (cmpPlayer.GetPopulationCount() == 0) {
 		GUINotification([1], markForTranslation("Avenge us! Kill all the enemy bandits!"));
 		TriggerHelper.DefeatPlayer(2);
@@ -106,9 +106,14 @@ Trigger.prototype.PlayerCommandHandler = function(data) {
 	// Check for the dialog response
 
 	// DifficultyDialog
-	if ( (this.DialogID == 1) && (data.cmd.answer == "button1") ) {
-		this.DifficultyMultiplier = 1; // Easy difficulty
-		this.DialogID = 0; //reset 
+	if (this.DialogID == 1) {
+		if (data.cmd.answer == "button1") {
+			this.DifficultyMultiplier = 1; // Easy difficulty
+			this.DialogID = 0; //reset the dialog var
+		} else {
+			this.DifficultyMultiplier = 1.3; // Intermediate difficulty
+			this.DialogID = 0;  // reset the dialog var
+		}
 
 		// start the actual storyline by arming the first OnRange trigger and posting a message 
 		var entities = cmpTrigger.GetTriggerPoints("B");
@@ -120,21 +125,7 @@ Trigger.prototype.PlayerCommandHandler = function(data) {
 			"enabled": true,
 		};
 		cmpTrigger.RegisterTrigger("OnRange", "VisitVillage", data);
-	}
-	if ( (this.DialogID == 1) && (data.cmd.answer == "button2") ) {
-		this.DifficultyMultiplier = 1.3; // Intermediate difficulty
-		this.DialogID = 0;  // reset the dialog var
-
-		// start the actual storyline by arming the first OnRange trigger and posting a message 
-		var entities = cmpTrigger.GetTriggerPoints("B");
-		data = {
-			"entities": entities, // central points to calculate the range circles
-			"players": [1], // only count entities of player 1
-			"maxRange": 20,
-			"requiredComponent": IID_UnitAI, // only count units in range
-			"enabled": true,
-		};
-		cmpTrigger.RegisterTrigger("OnRange", "VisitVillage", data);
+		this.DoAfterDelay(200, "IntroductionMessage", {});
 	}
 
 	// VisitVillageDialog
