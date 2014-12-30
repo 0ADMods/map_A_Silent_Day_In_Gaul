@@ -33,8 +33,8 @@
 		</Postproc>
 	</Environment>
 	<Camera>
-		<Position x="318.346" y="68.9726" z="341.138"/>
-		<Rotation angle="0.0794654"/>
+		<Position x="338.509" y="67.5641" z="127.254"/>
+		<Rotation angle="-0.271632"/>
 		<Declination angle="0.610865"/>
 	</Camera>
 	<ScriptSettings><![CDATA[
@@ -1258,13 +1258,6 @@
 			<Orientation y="3.0545"/>
 			<Actor seed="11570"/>
 		</Entity>
-		<Entity uid="203">
-			<Template>other/palisades_rocks_watchtower</Template>
-			<Player>3</Player>
-			<Position x="352.17661" z="79.89022"/>
-			<Orientation y="2.60073"/>
-			<Actor seed="36662"/>
-		</Entity>
 		<Entity uid="204">
 			<Template>gaia/geology_metal_temperate_slabs</Template>
 			<Player>0</Player>
@@ -1289,14 +1282,14 @@
 		<Entity uid="208">
 			<Template>units/gaul_champion_fanatic</Template>
 			<Player>3</Player>
-			<Position x="360.33869" z="55.48864"/>
+			<Position x="355.84131" z="51.63637"/>
 			<Orientation y="-0.59954"/>
 			<Actor seed="2020"/>
 		</Entity>
 		<Entity uid="209">
 			<Template>units/gaul_infantry_slinger_a</Template>
 			<Player>3</Player>
-			<Position x="375.22422" z="61.54047"/>
+			<Position x="373.93421" z="64.96732"/>
 			<Orientation y="-0.81717"/>
 			<Actor seed="34692"/>
 		</Entity>
@@ -1310,21 +1303,21 @@
 		<Entity uid="211">
 			<Template>units/gaul_infantry_javelinist_a</Template>
 			<Player>3</Player>
-			<Position x="366.52588" z="67.2063"/>
+			<Position x="364.46128" z="72.85497"/>
 			<Orientation y="-1.97701"/>
 			<Actor seed="782"/>
 		</Entity>
 		<Entity uid="212">
 			<Template>units/gaul_infantry_javelinist_a</Template>
 			<Player>3</Player>
-			<Position x="356.06968" z="65.32242"/>
+			<Position x="347.29355" z="64.37343"/>
 			<Orientation y="0.0337"/>
 			<Actor seed="8122"/>
 		</Entity>
 		<Entity uid="213">
 			<Template>units/gaul_infantry_spearman_b</Template>
 			<Player>3</Player>
-			<Position x="351.3599" z="53.76204"/>
+			<Position x="349.41034" z="53.39275"/>
 			<Orientation y="0.00031"/>
 			<Actor seed="40286"/>
 		</Entity>
@@ -1591,19 +1584,16 @@
 			<Template>actor|structures/plot_field_temp.xml</Template>
 			<Position x="276.15922" z="228.01934"/>
 			<Orientation y="2.35621"/>
-			<Actor seed="2276"/>
 		</Entity>
 		<Entity uid="263">
 			<Template>actor|structures/plot_field_temp.xml</Template>
 			<Position x="259.18442" z="255.09394"/>
 			<Orientation y="2.35621"/>
-			<Actor seed="15670"/>
 		</Entity>
 		<Entity uid="264">
 			<Template>actor|structures/plot_field_temp.xml</Template>
 			<Position x="241.45617" z="235.87159"/>
 			<Orientation y="2.35621"/>
-			<Actor seed="15536"/>
 		</Entity>
 		<Entity uid="265">
 			<Template>structures/gaul_outpost</Template>
@@ -2321,6 +2311,13 @@
 			<Position x="103.03057" z="441.49698"/>
 			<Orientation y="2.35621"/>
 			<Actor seed="52558"/>
+		</Entity>
+		<Entity uid="425">
+			<Template>structures/brit_defense_tower</Template>
+			<Player>3</Player>
+			<Position x="357.57502" z="63.39803"/>
+			<Orientation y="-0.74056"/>
+			<Actor seed="2072"/>
 		</Entity>
 	</Entities>
 	<Paths/>

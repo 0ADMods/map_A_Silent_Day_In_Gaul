@@ -74,7 +74,7 @@ Trigger.prototype.DefeatConditionsPlayerOneAndThree = function() {
 		// mark that player as defeated
 		var cmpPlayer = TriggerHelper.GetPlayerComponent(PlayerID);
 
-		if (cmpPlayer.GetState() != "active") 
+		if ( (!cmpPlayer) || (cmpPlayer.GetState() != "active") )
 			return;
 		if (cmpPlayer.GetConquestCriticalEntitiesCount() == 0) {
 			TriggerHelper.DefeatPlayer(PlayerID);
@@ -105,20 +105,95 @@ Trigger.prototype.DefeatConditionsPlayerTwo = function() {
 //PLAYER COMMAND LISTENER
 
 Trigger.prototype.PlayerCommandHandler = function(data) {
-	//check for the dialog response
-	if ((data.cmd.type == "dialog-answer") && (data.cmd.answer == "button1" || "button2"))
+	// Check for the dialog response
+
+	// DifficultyDialog
+	if ( (this.DialogID == 1) && (data.cmd.answer == "button1") ) {
+		this.DifficultyMultiplier = 1; // Easy difficulty
+		this.DialogID = 0; //reset 
+
+		// start the actual storyline by arming the first OnRange trigger and posting a message 
+		var entities = cmpTrigger.GetTriggerPoints("B");
+		data = {
+			"entities": entities, // central points to calculate the range circles
+			"players": [1], // only count entities of player 1
+			"maxRange": 20,
+			"requiredComponent": IID_UnitAI, // only count units in range
+			"enabled": true,
+		};
+		cmpTrigger.RegisterTrigger("OnRange", "VisitVillage", data);
+	}
+	if ( (this.DialogID == 1) && (data.cmd.answer == "button2") ) {
+		this.DifficultyMultiplier = 1.3; // Intermediate difficulty
+		this.DialogID = 0;  // reset the dialog var
+
+		// start the actual storyline by arming the first OnRange trigger and posting a message 
+		var entities = cmpTrigger.GetTriggerPoints("B");
+		data = {
+			"entities": entities, // central points to calculate the range circles
+			"players": [1], // only count entities of player 1
+			"maxRange": 20,
+			"requiredComponent": IID_UnitAI, // only count units in range
+			"enabled": true,
+		};
+		cmpTrigger.RegisterTrigger("OnRange", "VisitVillage", data);
+	}
+
+	// VisitVillageDialog
+	if ( (this.DialogID == 2) && (data.cmd.answer == "button1" || "button2") ) {
 		this.DoAfterDelay(1000, "VisitVillageMessage", {});
+		this.DialogID = 0;
+	}
 };
 
 //END OF PLAYER COMMAND LISTENER
 
 //MESSAGES AND DIALOGUES
 
+Trigger.prototype.DifficultyDialog = function() {
+	this.DialogID = 1;
+	var cmpGUIInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface);
+	cmpGUIInterface.PushNotification({
+		"type": "dialog",
+		"players": [1,2,3,4,5,6,7,8],
+		"dialogName": "yes-no",
+		"data": {
+			"text": {
+				"caption": {
+					"message": markForTranslation("This map supports 2 difficulties. Easy is recommended if you're a beginner, Intermediate if you have some experience in 0 A.D. already."),
+					"translateMessage": true,
+				},
+			},
+			"button1": {
+				"caption": {
+					"message": markForTranslation("Easy"),
+					"translateMessage": true,
+				},
+				"tooltip": {
+					"message": markForTranslation("Choose the Easy difficulty."),
+					"translateMessage": true,
+				},
+			},
+			"button2": {
+				"caption": {
+					"message": markForTranslation("Intermediate"),
+					"translateMessage": true,
+				},
+				"tooltip": {
+					"message": markForTranslation("Choose the Intermediate difficulty."),
+					"translateMessage": true,
+				},
+			},
+		},
+	});
+};
+
 Trigger.prototype.IntroductionMessage = function() {
 	GUINotification([1], markForTranslation("Visit the Elder in the Village to the East."));
 };
 
 Trigger.prototype.VisitVillageDialog = function() {
+	this.DialogID = 2;
 	var cmpGUIInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface);
 	cmpGUIInterface.PushNotification({
 		"type": "dialog",
@@ -268,7 +343,7 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 
 	//spawn attackers
 	var spawnPoint = "C";
-	this.attackSize = 5;
+	this.attackSize = Math.round(5 * this.DifficultyMultiplier);
 	this.PlayerID = 3;
 
 	var intruders = TriggerHelper.SpawnUnitsFromTriggerPoints(spawnPoint, "units/gaul_champion_fanatic", this.attackSize, this.PlayerID);
@@ -381,17 +456,13 @@ Trigger.prototype.FanaticRaid = function() {
 var cmpTrigger = Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger);
 var data = {"enabled": true};
 
-//Arm a number of triggers that are required to run along side the storyline
+// Vars for data storage
+cmpTrigger.DifficultyMultiplier = 0; // 1 is easy, 1.3 is intermediate
+cmpTrigger.DialogID = 0; // var to keep track of the dialogs
+
+// Arm a number of triggers that are required to run along side the storyline
 cmpTrigger.RegisterTrigger("OnOwnershipChanged", "CheckDefeatConditions", data);
 cmpTrigger.RegisterTrigger("OnPlayerCommand", "PlayerCommandHandler", data);
 
-//Start storyline by arming the first OnRange trigger and posting a message 
-var entities = cmpTrigger.GetTriggerPoints("B");
-var data = {
-	"entities": entities, // central points to calculate the range circles
-	"players": [1], // only count entities of player 1
-	"maxRange": 20,
-	"requiredComponent": IID_UnitAI, // only count units in range
-	"enabled": true,
-};
-cmpTrigger.RegisterTrigger("OnRange", "VisitVillage", data);
+// Start storyline by posting the first dialog 
+cmpTrigger.DoAfterDelay(0, "DifficultyDialog", {});
