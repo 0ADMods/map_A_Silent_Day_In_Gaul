@@ -1,13 +1,5 @@
 //Disables the territory decay (for all players)
-TerritoryDecay.prototype.Decay = function() {
-	var cmpHealth = Engine.QueryInterface(this.entity, IID_Health);
-	if (!cmpHealth)
-		return;
-
-	var decayRate = 0;
-
-	cmpHealth.Reduce(Math.round(decayRate));
-};
+TerritoryDecay.prototype.Decay = function() {};
 
 /* TRIGGERPOINTS:
  * A: Spawn for Reinforcements after Red village Destroyed
@@ -74,24 +66,22 @@ Trigger.prototype.CheckDefeatConditions = function()
 Trigger.prototype.DefeatConditionsPlayerOneAndThree = function() {
 	this.checkingConquestCriticalEntities = false;
 	
+	var cmpPlayerManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager);
 	var PlayerIDs = [1, 3];
-	var PlayerEnt = [];
 
-	for (var i = 0; i < PlayerIDs.length; i++) {
-		var cmpPlayerManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager);
-		
+	for(var PlayerID of PlayerIDs) {
 		// If the player is currently active but needs to be defeated,
 		// mark that player as defeated
+		var cmpPlayer = TriggerHelper.GetPlayerComponent(PlayerID);
 
-		var PlayerEntityId = cmpPlayerManager.GetPlayerByID(PlayerIDs[i]);
-		PlayerEnt[i] = Engine.QueryInterface(PlayerEntityId, IID_Player);
-		if (PlayerEnt[i].GetState() != "active") 
+		if (cmpPlayer.GetState() != "active") 
 			return;
-		if (PlayerEnt[i].GetConquestCriticalEntitiesCount() == 0) {
-			TriggerHelper.DefeatPlayer(PlayerIDs[i]);
-			if (PlayerIDs[i] == 1) {
+		if (cmpPlayer.GetConquestCriticalEntitiesCount() == 0) {
+			TriggerHelper.DefeatPlayer(PlayerID);
+			// Push end game messages depending on the defeated player
+			if (PlayerID == 1) {
 				GUINotification([1], markForTranslation("Shame on you! Now the bandits can do whatever they like! Nothing can stop them now!"));
-			} else if (PlayerIDs[i] == 3) {
+			} else if (PlayerID == 3) {
 				GUINotification([1], markForTranslation("Well done! You've killed all the bandits!"));
 				TriggerHelper.SetPlayerWon(1);
 			}
