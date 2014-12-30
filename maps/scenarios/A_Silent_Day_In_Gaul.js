@@ -71,6 +71,8 @@ Trigger.prototype.DefeatConditionsPlayerOneAndThree = function() {
 		// If the player is currently active but needs to be defeated,
 		// mark that player as defeated
 		var cmpPlayer = TriggerHelper.GetPlayerComponent(PlayerID);
+		if (cmpPlayer.GetState() != "active") 
+			continue;
 		if (cmpPlayer.GetConquestCriticalEntitiesCount() == 0) {
 			TriggerHelper.DefeatPlayer(PlayerID);
 			// Push end game messages depending on the defeated player
@@ -86,10 +88,10 @@ Trigger.prototype.DefeatConditionsPlayerOneAndThree = function() {
 };
 
 Trigger.prototype.DefeatConditionsPlayerTwo = function() {
-
 	var cmpPlayer = TriggerHelper.GetPlayerComponent(2);
+	if (cmpPlayer.GetState() != "active") 
+		continue;	
 	if (cmpPlayer.GetPopulationCount() == 0) {
-		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo");
 		GUINotification([1], markForTranslation("Avenge us! Kill all the enemy bandits!"));
 		TriggerHelper.DefeatPlayer(2);
 	}
@@ -411,7 +413,7 @@ Trigger.prototype.FleeToTheEast = function(data) {
 	var reinforcements = TriggerHelper.SpawnUnitsFromTriggerPoints(spawnPoint, "units/gaul_champion_infantry", this.attackSize, this.PlayerID);
 
 	this.DoAfterDelay(200, "ReinforcementsMessage", {});
-	
+
 	this.DoAfterDelay(60000, "FanaticRaid", {}); //Attack after 60 seconds
 };
 
