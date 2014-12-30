@@ -62,10 +62,8 @@ Trigger.prototype.CheckDefeatConditions = function()
 };
 
 
-//Modified version of the Conquest game type to allow for a cumstomized defeatcondition of Player 2 and some other niceties
+// Modified version of the Conquest game type to allow for a cumstomized defeatcondition of Player 2 and some other niceties
 Trigger.prototype.DefeatConditionsPlayerOneAndThree = function() {
-	this.checkingConquestCriticalEntities = false;
-	
 	var cmpPlayerManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager);
 	var PlayerIDs = [1, 3];
 
@@ -73,9 +71,6 @@ Trigger.prototype.DefeatConditionsPlayerOneAndThree = function() {
 		// If the player is currently active but needs to be defeated,
 		// mark that player as defeated
 		var cmpPlayer = TriggerHelper.GetPlayerComponent(PlayerID);
-
-		if ( (!cmpPlayer) || (cmpPlayer.GetState() != "active") )
-			return;
 		if (cmpPlayer.GetConquestCriticalEntitiesCount() == 0) {
 			TriggerHelper.DefeatPlayer(PlayerID);
 			// Push end game messages depending on the defeated player
@@ -87,10 +82,10 @@ Trigger.prototype.DefeatConditionsPlayerOneAndThree = function() {
 			}
 		}
 	}
+	this.checkingConquestCriticalEntities = false;
 };
 
 Trigger.prototype.DefeatConditionsPlayerTwo = function() {
-	this.checkingConquestCriticalEntities = false;
 
 	var cmpPlayer = TriggerHelper.GetPlayerComponent(2);
 	if (cmpPlayer.GetPopulationCount() == 0) {
@@ -98,6 +93,7 @@ Trigger.prototype.DefeatConditionsPlayerTwo = function() {
 		GUINotification([1], markForTranslation("Avenge us! Kill all the enemy bandits!"));
 		TriggerHelper.DefeatPlayer(2);
 	}
+	this.checkingConquestCriticalEntities = false;
 };
 
 // END OF DEFEATCONDITIONS
@@ -343,7 +339,7 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 
 	// spawn attackers
 	var spawnPoint = "C";
-	this.attackSize = Math.round(10 * this.DifficultyMultiplier);
+	this.attackSize = 5;
 	this.PlayerID = 3;
 
 	var intruders = TriggerHelper.SpawnUnitsFromTriggerPoints(spawnPoint, "units/gaul_champion_fanatic", this.attackSize, this.PlayerID);
@@ -415,9 +411,7 @@ Trigger.prototype.FleeToTheEast = function(data) {
 	var reinforcements = TriggerHelper.SpawnUnitsFromTriggerPoints(spawnPoint, "units/gaul_champion_infantry", this.attackSize, this.PlayerID);
 
 	this.DoAfterDelay(200, "ReinforcementsMessage", {});
-
-	this.RegisterTrigger("OnStructureBuilt", "CivilCenterLocation", {"enabled" : true});
-
+	
 	this.DoAfterDelay(60000, "FanaticRaid", {}); //Attack after 60 seconds
 };
 
