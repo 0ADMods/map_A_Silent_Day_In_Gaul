@@ -33,8 +33,8 @@
 		</Postproc>
 	</Environment>
 	<Camera>
-		<Position x="338.509" y="67.5641" z="127.254"/>
-		<Rotation angle="-0.271632"/>
+		<Position x="281.678" y="57.9815" z="180.397"/>
+		<Rotation angle="-0.131702"/>
 		<Declination angle="0.610865"/>
 	</Camera>
 	<ScriptSettings><![CDATA[
@@ -1595,13 +1595,6 @@
 			<Position x="241.45617" z="235.87159"/>
 			<Orientation y="2.35621"/>
 		</Entity>
-		<Entity uid="265">
-			<Template>structures/gaul_outpost</Template>
-			<Player>2</Player>
-			<Position x="256.0741" z="220.54299"/>
-			<Orientation y="2.35621"/>
-			<Actor seed="8840"/>
-		</Entity>
 		<Entity uid="266">
 			<Template>special/trigger_point_F</Template>
 			<Player>0</Player>
@@ -2318,6 +2311,13 @@
 			<Position x="357.57502" z="63.39803"/>
 			<Orientation y="-0.74056"/>
 			<Actor seed="2072"/>
+		</Entity>
+		<Entity uid="426">
+			<Template>structures/gaul_farmstead</Template>
+			<Player>2</Player>
+			<Position x="255.37537" z="213.86863"/>
+			<Orientation y="0.74527"/>
+			<Actor seed="23562"/>
 		</Entity>
 	</Entities>
 	<Paths/>
