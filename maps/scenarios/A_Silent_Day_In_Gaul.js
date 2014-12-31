@@ -1,4 +1,4 @@
-// Disables the territory decay (for all players)
+// disables the territory decay (for all players)
 TerritoryDecay.prototype.Decay = function() {};
 
 /* TRIGGERPOINTS:
@@ -16,7 +16,7 @@ TerritoryDecay.prototype.Decay = function() {};
 
 /* Add a certain amount of a given resource to a given player
  * @param PlayerID: the ID of the player that receives the resources
- * @param resources: object that holds resource data: var resources = {"food" : 500};
+ * @param resources: object that holds resource data. example: var resources = {"food" : 500};
  */
 function AddPlayerResources(PlayerID, resources) {
 	var cmpPlayer = TriggerHelper.GetPlayerComponent(PlayerID);
@@ -37,6 +37,7 @@ function AddPlayerResources(PlayerID, resources) {
  */
 function GUINotification(players, message) {
 	var cmpGUIInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface);
+
 	cmpGUIInterface.PushNotification({
 		"players": players, 
 		"message": message,
@@ -62,20 +63,20 @@ Trigger.prototype.CheckDefeatConditions = function()
 };
 
 
-// Modified version of the Conquest game type to allow for a cumstomized defeatcondition of Player 2 and some other niceties
+// modified version of the Conquest game type to allow for a cumstomized defeatcondition of Player 2 and some other niceties
 Trigger.prototype.DefeatConditionsPlayerOneAndThree = function() {
 	var cmpPlayerManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager);
 	var PlayerIDs = [1, 3];
 
 	for(var PlayerID of PlayerIDs) {
-		// If the player is currently active but needs to be defeated,
+		// if the player is currently active but needs to be defeated,
 		// mark that player as defeated
 		var cmpPlayer = TriggerHelper.GetPlayerComponent(PlayerID);
 		if (cmpPlayer.GetState() != "active") 
 			continue;
 		if (cmpPlayer.GetConquestCriticalEntitiesCount() == 0) {
 			TriggerHelper.DefeatPlayer(PlayerID);
-			// Push end game messages depending on the defeated player
+			// push end game messages depending on the defeated player
 			if (PlayerID == 1) {
 				GUINotification([1], markForTranslation("Shame on you! Now the bandits can do whatever they like! Nothing can stop them now!"));
 			} else if (PlayerID == 3) {
@@ -103,7 +104,7 @@ Trigger.prototype.DefeatConditionsPlayerTwo = function() {
 // MISC
 
 Trigger.prototype.PlayerCommandHandler = function(data) {
-	// Check for the dialog response
+	// check for dialog responses
 
 	// DifficultyDialog
 	if (this.DialogID == 1) {
@@ -222,7 +223,7 @@ Trigger.prototype.VisitVillageDialog = function() {
 Trigger.prototype.VisitVillageMessage = function() {
 	GUINotification([1], markForTranslation("Very good! I love that eagerness! I have a task for you: I need you to rebuild the old Outpost to the West of here. We need it to signal to other tribes. Good luck."));
 
-	// Add resources required to build an Outpost
+	// add resources required to build an Outpost
 	var resources = {
 		"wood": 80,
 	};
@@ -269,8 +270,8 @@ Trigger.prototype.DefeatPlayerThreeMessage = function() {
 
 // STORYLINE (IN SEQUENCE)
 
-/* This function fires a dialog as soon as the player comes in range of the Triggerpoint located in the Red Village. 
- * After this dialog, this trigger is disabled and the BuildOutpost trigger enabled.
+/* This function fires a dialog as soon as the player comes in range of the Triggerpoint located in the Red Village
+ * After this dialog, this trigger is disabled and the BuildOutpost trigger enabled
  */
 Trigger.prototype.VisitVillage = function(data) {
 	// disable current trigger, execute commands and enable the next trigger(s)
@@ -313,7 +314,7 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 	var template = cmpTemplateManager.GetCurrentTemplateName(entity1);
 
 	if (template != "structures/gaul_outpost") {
-		//disable defeat conditions
+		// disable defeat conditions
 		this.DisableTrigger("OnOwnershipChanged", "CheckDefeatConditions");
 
 		this.DoAfterDelay(0, "BuildOutpostWrongTypeMessage", {});
@@ -322,7 +323,7 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 	}
 
 	if (distance > 30) {
-		//disable defeat conditions
+		// disable defeat conditions
 		this.DisableTrigger("OnOwnershipChanged", "CheckDefeatConditions");
 
 		this.DoAfterDelay(0, "BuildOutpostWrongPlaceMessage", {});
@@ -334,7 +335,6 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 	var spawnPoint = "C";
 	this.attackSize = 5;
 	this.PlayerID = 3;
-
 	var intruders = TriggerHelper.SpawnUnitsFromTriggerPoints(spawnPoint, "units/gaul_champion_fanatic", this.attackSize, this.PlayerID);
 
 	for (var origin in intruders) {
@@ -372,14 +372,12 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 
 Trigger.prototype.FleeToTheEast = function(data) {
 	this.DisableTrigger("OnRange", "FleeToTheEast");
+
 	this.PlayerID = 1;
-
 	var cmpPlayerManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager);
-
 	var PlayerEntityId = cmpPlayerManager.GetPlayerByID(this.PlayerID);
-	var technames = ["phase_town_generic", "phase_city_gauls"];
-
 	var cmpTechnologyManager = Engine.QueryInterface(PlayerEntityId, IID_TechnologyManager); 
+	var technames = ["phase_town_generic", "phase_city_gauls"];
 
 	for(var i = 0; i < technames.length; i++) {
 		// check if technology is already researched (accidentally)
@@ -388,7 +386,7 @@ Trigger.prototype.FleeToTheEast = function(data) {
 		}
 	}
 
-	//Add resources required to build a Civil Center
+	// add resources required to build a Civil Center
 	var resources = {
 		"wood": 500,
 		"stone": 500,
@@ -400,12 +398,11 @@ Trigger.prototype.FleeToTheEast = function(data) {
 	var spawnPoint = "A";
 	this.attackSize = 5;
 	this.PlayerID = 1;
-
 	var reinforcements = TriggerHelper.SpawnUnitsFromTriggerPoints(spawnPoint, "units/gaul_champion_infantry", this.attackSize, this.PlayerID);
 
 	this.DoAfterDelay(200, "ReinforcementsMessage", {});
 
-	this.DoAfterDelay(60000, "FanaticRaid", {}); //Attack after 60 seconds
+	this.DoAfterDelay(60000, "FanaticRaid", {}); // attack after 60 seconds
 };
 
 Trigger.prototype.FanaticRaid = function() {
@@ -415,14 +412,14 @@ Trigger.prototype.FanaticRaid = function() {
 
 	var cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
 	var units = [];
-	
+	var cmd = null;
+
+	// search for all fanatic units and put the IDs in an array
 	for(var ent of entities) {
 		var template = cmpTemplateManager.GetCurrentTemplateName(ent);
 		if (template == "units/gaul_champion_fanatic")
 			units.push(ent);
 	}
-
-	var cmd = null;
 
 	for(var target of this.GetTriggerPoints("A")) 		{
 		var cmpPosition = Engine.QueryInterface(target, IID_Position);
@@ -438,26 +435,22 @@ Trigger.prototype.FanaticRaid = function() {
 	cmd.queued = true;
 	ProcessCommand(3, cmd);
 
-	this.DoAfterDelay(3000, "FanaticRaidMessage", {}); //3 seconds delay for the 'surprise-effect'
+	this.DoAfterDelay(5000, "FanaticRaidMessage", {}); // 5 seconds delay for the 'surprise-effect'
 	
-
 	data.delay = 300000; // after 5 minutes
 	data.interval = 300000; // every 5 minutes
-
 	cmpTrigger.RegisterTrigger("OnInterval", "BanditReinforcements", data);
 };
 
 Trigger.prototype.BanditReinforcements = function(data) {
 	this.PlayerID = 3;
-
-	this.attackSize = (Math.round(this.attackSize + this.attackSizeIncrement));
-	this.attackSizeIncrement = (this.attackSizeIncrement * this.DifficultyMultiplier);
-
 	var reinforcementPoint = "F";
-
+	this.attackSize = Math.round(this.attackSize + this.attackSizeIncrement);
+	this.attackSizeIncrement = (this.attackSizeIncrement * this.DifficultyMultiplier);
 	var reinforcements = TriggerHelper.SpawnUnitsFromTriggerPoints(reinforcementPoint, "units/gaul_champion_fanatic", this.attackSize, this.PlayerID);
 
-	// Check if the Bandit base needs reinforcement and move to that instead. Else attack towards 'A' or the Civil Center if it exists
+	// check if the Bandit base needs reinforcement and issue a move command to the base if needed 
+		// else attack towards 'A' or, if it exists, the Civil Center built by the Human player
 	for (var origin in reinforcements) {
 		var cmd = null;
 
@@ -494,7 +487,6 @@ Trigger.prototype.BanditReinforcements = function(data) {
 		var structures = [];
 
 		for(var entity of entities) {
-
 			var template = cmpTemplateManager.GetCurrentTemplateName(entity);
 			if (template == "structures/gaul_civil_centre") {
 				structures.push(entity);
@@ -523,17 +515,15 @@ Trigger.prototype.BanditReinforcements = function(data) {
 var cmpTrigger = Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger);
 var data = {"enabled": true};
 
-// Vars for data storage
+// vars for data storage
 cmpTrigger.DifficultyMultiplier = 0.5; // 0.5 is easy, 0.7 is intermediate
 cmpTrigger.DialogID = 0; // var to keep track of the dialogs
 cmpTrigger.attackSize = 5; // initial amount for Bandit reinforcements
 cmpTrigger.attackSizeIncrement = 5; // amount to add to the attackSize each raid
 
-
-// Arm a number of triggers that are required to run along side the storyline
+// arm a number of triggers that are required to run along side the storyline
 cmpTrigger.RegisterTrigger("OnOwnershipChanged", "CheckDefeatConditions", data);
 cmpTrigger.RegisterTrigger("OnPlayerCommand", "PlayerCommandHandler", data);
 
-// Start storyline by posting the first dialog 
-cmpTrigger.DoAfterDelay(0, "DifficultyDialog", {});
-
+// start storyline by posting the first dialog 
+cmpTrigger.DoAfterDelay(200, "DifficultyDialog", {});
