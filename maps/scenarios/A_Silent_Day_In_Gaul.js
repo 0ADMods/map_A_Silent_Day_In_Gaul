@@ -136,6 +136,79 @@ Trigger.prototype.PlayerCommandHandler = function(data) {
 	}
 };
 
+// make sure player 1 and 4 have the correct diplomacy status at the start of the game
+Trigger.prototype.InitDiplomacies = function() {
+	var cmpPlayer = TriggerHelper.GetPlayerComponent(1);
+	cmpPlayer.SetNeutral(4);
+
+	cmpPlayer = TriggerHelper.GetPlayerComponent(4);
+	cmpPlayer.SetNeutral(1);
+};
+
+Trigger.prototype.FarmerGather = function(data) {
+	this.DisableTrigger("OnRange", "FarmerGather");
+	this.DoAfterDelay(200, "FarmerMessage", {});
+
+	// Set diplomacies
+	var cmd = {};
+	cmd.type = "diplomacy";
+	cmd.to = "ally";
+	cmd.player = 1;
+	ProcessCommand(4, cmd);
+
+	var cmpPlayer = TriggerHelper.GetPlayerComponent(4);
+	cmpPlayer.SetNeutral(1);
+
+	this.playerID = 4;
+	var cmpRangeManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_RangeManager);
+	var entities = cmpRangeManager.GetEntitiesByPlayer(this.playerID);
+
+	var gatherers = [];
+	var resource = [];
+
+	for(var entity of entities) {
+		if (TriggerHelper.EntityHasClass(entity, "Unit")) {
+			gatherers.push(entity);
+		}
+		if (TriggerHelper.EntityHasClass(entity, "Field")) {
+			resource.push(entity);
+		}
+	}
+
+	var cmd = {};
+	cmd.type = "gather";
+	cmd.entities = gatherers;
+	cmd.target = resource[0];
+	cmd.queued = true;
+	ProcessCommand(4, cmd);
+
+	data.enabled = true;
+	data.delay = 10000; // after 10 seconds
+	data.interval = 30000; // every 30 seconds
+	this.RegisterTrigger("OnInterval", "FarmerTribute", data);
+};
+
+Trigger.prototype.FarmerTribute = function(data) {
+	this.PlayerID = 4;
+	var cmpPlayer = TriggerHelper.GetPlayerComponent(this.PlayerID);
+
+	var resource = {"food" : cmpPlayer.GetResourceCounts()["food"]};
+
+	if (resource["food"] < 50)
+		return;
+
+	var cmd = {};
+	cmd.type = "tribute";
+	cmd.player = 1;
+	cmd.amounts = resource;
+	ProcessCommand(4, cmd);
+};
+
+Trigger.prototype.TreasureFound = function() {
+	this.DisableTrigger("OnRange", "TreasureFound");
+	this.DoAfterDelay(200, "TreasureFoundMessage", {});
+};
+
 // END OF MISC
 
 // MESSAGES AND DIALOGUES
@@ -252,6 +325,14 @@ Trigger.prototype.ReinforcementsMessage = function() {
 
 Trigger.prototype.FanaticRaidMessage = function() {
 	GUINotification([1], markForTranslation("Gaul Warrior: Beware! Enemies are upon us!"));
+};
+
+Trigger.prototype.FarmerMessage = function() {
+	GUINotification([1], markForTranslation("You're not one of those bandits, eh? They took my wife and children and ruined my life. I'll help you with whatever I can."));
+};
+
+Trigger.prototype.TreasureFoundMessage = function() {
+	GUINotification([1], markForTranslation("Hmm, it seems that someone left a good amount of metal here. Let's put it to a good use!"));
 };
 
 Trigger.prototype.DefeatPlayerOneMessage = function() {
@@ -524,6 +605,25 @@ cmpTrigger.attackSizeIncrement = 5; // amount to add to the attackSize each raid
 // arm a number of triggers that are required to run along side the storyline
 cmpTrigger.RegisterTrigger("OnOwnershipChanged", "CheckDefeatConditions", data);
 cmpTrigger.RegisterTrigger("OnPlayerCommand", "PlayerCommandHandler", data);
+cmpTrigger.DoAfterDelay(0, "InitDiplomacies", {});
+var entities = cmpTrigger.GetTriggerPoints("G");
+data = {
+	"entities": entities, // central points to calculate the range circles
+	"players": [1], // only count entities of player 1
+	"maxRange": 40,
+	"requiredComponent": IID_UnitAI, // only count units in range
+	"enabled": true,
+};
+cmpTrigger.RegisterTrigger("OnRange", "FarmerGather", data);
+var entities = cmpTrigger.GetTriggerPoints("H");
+data = {
+	"entities": entities, // central points to calculate the range circles
+	"players": [1], // only count entities of player 1
+	"maxRange": 30,
+	"requiredComponent": IID_UnitAI, // only count units in range
+	"enabled": true,
+};
+cmpTrigger.RegisterTrigger("OnRange", "TreasureFound", data);
 
 // start storyline by posting the first dialog 
 cmpTrigger.DoAfterDelay(200, "DifficultyDialog", {});
