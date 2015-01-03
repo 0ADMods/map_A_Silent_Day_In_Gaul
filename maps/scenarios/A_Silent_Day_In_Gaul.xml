@@ -6,11 +6,11 @@
 		<SunColour r="0.501961" g="0.501961" b="0.247059"/>
 		<SunElevation angle="0.458739"/>
 		<SunRotation angle="-2.45754"/>
-		<TerrainAmbientColour r="0.501961" g="0.501961" b="0.501961"/>
-		<UnitsAmbientColour r="0.501961" g="0.501961" b="0.501961"/>
+		<TerrainAmbientColour r="0.54902" g="0.611765" b="0.709804"/>
+		<UnitsAmbientColour r="0.54902" g="0.611765" b="0.709804"/>
 		<Fog>
-			<FogFactor>0</FogFactor>
-			<FogThickness>0.5</FogThickness>
+			<FogFactor>0.00265625</FogFactor>
+			<FogThickness>0.207031</FogThickness>
 			<FogColour r="0.501961" g="0.501961" b="0.501961"/>
 		</Fog>
 		<Water>
@@ -25,17 +25,17 @@
 			</WaterBody>
 		</Water>
 		<Postproc>
-			<Brightness>0.0078125</Brightness>
-			<Contrast>1.00781</Contrast>
-			<Saturation>0.6875</Saturation>
-			<Bloom>0.196875</Bloom>
+			<Brightness>-0.0078125</Brightness>
+			<Contrast>1.01563</Contrast>
+			<Saturation>0.890625</Saturation>
+			<Bloom>0.2</Bloom>
 			<PostEffect>hdr</PostEffect>
 		</Postproc>
 	</Environment>
 	<Camera>
-		<Position x="76.9726" y="64.7467" z="318.435"/>
-		<Rotation angle="-0.0663229"/>
-		<Declination angle="0.610865"/>
+		<Position x="109.465" y="65.9976" z="52.8926"/>
+		<Rotation angle="0.0388952"/>
+		<Declination angle="0.602254"/>
 	</Camera>
 	<ScriptSettings><![CDATA[
 {
