@@ -6,7 +6,7 @@
 		<SunColour r="0.501961" g="0.501961" b="0.247059"/>
 		<SunElevation angle="0.458739"/>
 		<SunRotation angle="-2.45754"/>
-		<TerrainAmbientColour r="0.54902" g="0.611765" b="0.709804"/>
+		<TerrainAmbientColour r="0.717647" g="0.756863" b="0.815686"/>
 		<UnitsAmbientColour r="0.54902" g="0.611765" b="0.709804"/>
 		<Fog>
 			<FogFactor>0.00265625</FogFactor>
@@ -33,9 +33,9 @@
 		</Postproc>
 	</Environment>
 	<Camera>
-		<Position x="109.465" y="65.9976" z="52.8926"/>
-		<Rotation angle="0.0388952"/>
-		<Declination angle="0.602254"/>
+		<Position x="175.247" y="91.4888" z="31.5679"/>
+		<Rotation angle="0"/>
+		<Declination angle="0.610865"/>
 	</Camera>
 	<ScriptSettings><![CDATA[
 {
@@ -46,6 +46,7 @@
   "LockTeams": true,
   "Name": "A Silent Day In Gaul",
   "PlayerData": [
+    null,
     {
       "Civ": "gaul",
       "Colour": {

@@ -33,7 +33,7 @@ function AddPlayerResources(PlayerID, resources) {
 
 /* Post a GUI notification
  * @param players: Array of playerIDs to post the message to
- * @param message: the to be posted message in a String
+ * @param message: the to be posted message in a string
  */
 function GUINotification(players, message) {
 	var cmpGUIInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface);
@@ -43,6 +43,21 @@ function GUINotification(players, message) {
 		"message": message,
 		translateMessage: true
 	});
+}
+
+/* Post a chat message
+ * @param sender: PlayerID of the player that sends the message
+ * @param recipient: Array of PlayerIDs that will see the message
+ * @param message: the to be posted message in a string
+ */
+
+function ChatNotification(sender, recipient, message) {
+	var cmd = {
+		"type" : "chat",
+		"players" : recipient,
+		"message" : message
+	};
+	ProcessCommand(sender, cmd);
 }
 
 // END OF FUNCTIONS
@@ -130,7 +145,7 @@ Trigger.prototype.PlayerCommandHandler = function(data) {
 	}
 
 	// VisitVillageDialog
-	if ( (this.DialogID == 2) && (data.cmd.answer == "button1" || "button2") ) {
+	if ( (this.DialogID == 2) ) {
 		this.DoAfterDelay(1000, "VisitVillageMessage", {});
 		this.DialogID = 0;
 	}
@@ -207,6 +222,10 @@ Trigger.prototype.FarmerTribute = function(data) {
 Trigger.prototype.TreasureFound = function() {
 	this.DisableTrigger("OnRange", "TreasureFound");
 	this.DoAfterDelay(200, "TreasureFoundMessage", {});
+};
+
+Trigger.prototype.SendMessage = function() {
+	ChatNotification(2, [1], markForTranslation("Hello buddies!"));
 };
 
 // END OF MISC
@@ -627,3 +646,5 @@ cmpTrigger.RegisterTrigger("OnRange", "TreasureFound", data);
 
 // start storyline by posting the first dialog 
 cmpTrigger.DoAfterDelay(200, "DifficultyDialog", {});
+
+// cmpTrigger.DoAfterDelay(200, "SendMessage", {});
