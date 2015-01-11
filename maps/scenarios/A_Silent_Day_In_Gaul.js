@@ -1,16 +1,3 @@
-// debug listeners
-Trigger.prototype.OwnershipChangedAction = function(data)
-{
-	//warn("The OnOwnershipChanged event happened with the following data:");
-	//warn(uneval(data));
-};
-
-Trigger.prototype.PlayerCommandAction = function(data)
-{
-	//warn("The OnPlayerCommand event happened with the following data:");
-	//warn(uneval(data));
-};
-
 // disables the territory decay (for all players)
 TerritoryDecay.prototype.Decay = function() {};
 
@@ -77,22 +64,8 @@ function ChatNotification(sender, recipient, message) {
 
 // DEFEATCONDITIONS
 
-/*
- * Check players the next turn. Avoids problems in Atlas, with promoting entities etc
- */
-Trigger.prototype.CheckDefeatConditions = function()
-{
-	if (this.checkingConquestCriticalEntities)
-		return;
-	// wait a turn for actually checking the players
-	this.DoAfterDelay(0, "DefeatConditionsPlayerTwo", {});
-	this.DoAfterDelay(0, "DefeatConditionsPlayerOneAndThree", {});
-	this.checkingConquestCriticalEntities = true;
-};
-
-
 // modified version of the Conquest game type to allow for a cumstomized defeatcondition of Player 2 and some other niceties
-Trigger.prototype.DefeatConditionsPlayerOneAndThree = function() {
+Trigger.prototype.DefeatConditionsPlayerOneAndThree = function(data) {
 	var cmpPlayerManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager);
 	var PlayerIDs = [1, 3];
 
@@ -116,15 +89,13 @@ Trigger.prototype.DefeatConditionsPlayerOneAndThree = function() {
 	this.checkingConquestCriticalEntities = false;
 };
 
-Trigger.prototype.DefeatConditionsPlayerTwo = function() {
+Trigger.prototype.DefeatConditionsPlayerTwo = function(data) {
 	var cmpPlayer = TriggerHelper.GetPlayerComponent(2);
 	
 	if ((!cmpPlayer) || (cmpPlayer.GetState() != "active"))
 		return;	
 	
-	warn(uneval(cmpPlayer.GetPopulationCount()));
 	if (cmpPlayer.GetPopulationCount() == 0) {
-		warn(uneval("Marking player 2 as defeated"));
 		this.DoAfterDelay(0, "DefeatPlayerTwoMessage", null);
 		TriggerHelper.DefeatPlayer(2);
 	}
@@ -634,9 +605,6 @@ Trigger.prototype.BanditReinforcements = function(data) {
 var cmpTrigger = Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger);
 var data = {"enabled": true};
 
-cmpTrigger.RegisterTrigger("OnOwnershipChanged", "OwnershipChangedAction", data);
-cmpTrigger.RegisterTrigger("OnPlayerCommand", "PlayerCommandAction", data);
-
 // vars for data storage
 cmpTrigger.DifficultyMultiplier = 0.5; // 0.5 is easy, 0.7 is intermediate
 cmpTrigger.DialogID = 0; // var to keep track of the dialogs
@@ -644,7 +612,8 @@ cmpTrigger.attackSize = 5; // initial amount for Bandit reinforcements
 cmpTrigger.attackSizeIncrement = 5; // amount to add to the attackSize each raid
 
 // arm a number of triggers that are required to run along side the storyline
-cmpTrigger.RegisterTrigger("OnOwnershipChanged", "CheckDefeatConditions", data);
+cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerOneAndThree", data);
+cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo", data);
 cmpTrigger.RegisterTrigger("OnPlayerCommand", "PlayerCommandHandler", data);
 cmpTrigger.DoAfterDelay(0, "InitDiplomacies", {});
 var entities = cmpTrigger.GetTriggerPoints("G");
