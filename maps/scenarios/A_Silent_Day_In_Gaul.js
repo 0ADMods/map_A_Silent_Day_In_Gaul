@@ -1,3 +1,16 @@
+// debug listeners
+Trigger.prototype.OwnershipChangedAction = function(data)
+{
+	warn("The OnOwnershipChanged event happened with the following data:");
+	warn(uneval(data));
+};
+
+Trigger.prototype.PlayerCommandAction = function(data)
+{
+	warn("The OnPlayerCommand event happened with the following data:");
+	warn(uneval(data));
+};
+
 // disables the territory decay (for all players)
 TerritoryDecay.prototype.Decay = function() {};
 
@@ -72,8 +85,8 @@ Trigger.prototype.CheckDefeatConditions = function()
 	if (this.checkingConquestCriticalEntities)
 		return;
 	// wait a turn for actually checking the players
-	this.DoAfterDelay(0, "DefeatConditionsPlayerOneAndThree", null);
-	this.DoAfterDelay(0, "DefeatConditionsPlayerTwo", null);
+	this.DoAfterDelay(0, "DefeatConditionsPlayerTwo", {});
+	this.DoAfterDelay(0, "DefeatConditionsPlayerOneAndThree", {});
 	this.checkingConquestCriticalEntities = true;
 };
 
@@ -90,14 +103,14 @@ Trigger.prototype.DefeatConditionsPlayerOneAndThree = function() {
 		if (cmpPlayer.GetState() != "active") 
 			continue;
 		if (cmpPlayer.GetConquestCriticalEntitiesCount() == 0) {
-			TriggerHelper.DefeatPlayer(PlayerID);
 			// push end game messages depending on the defeated player
 			if (PlayerID == 1) {
-				GUINotification([1], markForTranslation("Shame on you! Now the bandits can do whatever they like! Nothing can stop them now!"));
+				this.DoAfterDelay(0, "DefeatPlayerOneMessage", {});
 			} else if (PlayerID == 3) {
-				GUINotification([1], markForTranslation("Well done! You've killed all the bandits!"));
+				this.DoAfterDelay(0, "DefeatPlayerThreeMessage", {});
 				TriggerHelper.SetPlayerWon(1);
 			}
+			TriggerHelper.DefeatPlayer(PlayerID);
 		}
 	}
 	this.checkingConquestCriticalEntities = false;
@@ -108,7 +121,8 @@ Trigger.prototype.DefeatConditionsPlayerTwo = function() {
 	if (cmpPlayer.GetState() != "active") 
 		return;	
 	if (cmpPlayer.GetPopulationCount() == 0) {
-		GUINotification([1], markForTranslation("Avenge us! Kill all the enemy bandits!"));
+		warn("Marking Player 2 as defeated");
+		this.DoAfterDelay(0, "DefeatPlayerTwoMessage", {});
 		TriggerHelper.DefeatPlayer(2);
 	}
 	this.checkingConquestCriticalEntities = false;
@@ -172,8 +186,9 @@ Trigger.prototype.FarmerGather = function(data) {
 	ProcessCommand(4, cmd);
 
 	var cmpPlayer = TriggerHelper.GetPlayerComponent(4);
-	cmpPlayer.SetNeutral(1);
+	cmpPlayer.SetAlly(1);
 
+	// find the gatherer and the field IDs and task the gatherer to the field
 	this.playerID = 4;
 	var cmpRangeManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_RangeManager);
 	var entities = cmpRangeManager.GetEntitiesByPlayer(this.playerID);
@@ -204,6 +219,8 @@ Trigger.prototype.FarmerGather = function(data) {
 };
 
 Trigger.prototype.FarmerTribute = function(data) {
+	// Every 30 seconds the Farmer player tributes all his food as long as he has more than 50
+
 	this.PlayerID = 4;
 	var cmpPlayer = TriggerHelper.GetPlayerComponent(this.PlayerID);
 
@@ -222,10 +239,6 @@ Trigger.prototype.FarmerTribute = function(data) {
 Trigger.prototype.TreasureFound = function() {
 	this.DisableTrigger("OnRange", "TreasureFound");
 	this.DoAfterDelay(200, "TreasureFoundMessage", {});
-};
-
-Trigger.prototype.SendMessage = function() {
-	ChatNotification(2, [1], markForTranslation("Hello buddies!"));
 };
 
 // END OF MISC
@@ -313,7 +326,8 @@ Trigger.prototype.VisitVillageDialog = function() {
 };
 
 Trigger.prototype.VisitVillageMessage = function() {
-	GUINotification([1], markForTranslation("Very good! I love that eagerness! I have a task for you: I need you to rebuild the old Outpost to the West of here. We need it to signal to other tribes. Good luck."));
+	ChatNotification(2, [1], markForTranslation("Elder: Very good! I love that eagerness! I have a task for you: I need you to rebuild the old Outpost to the West of here. We need it to signal to other tribes. Good luck."));
+	GUINotification([1], markForTranslation("Build an Outpost on the hill to the west."));
 
 	// add resources required to build an Outpost
 	var resources = {
@@ -323,35 +337,37 @@ Trigger.prototype.VisitVillageMessage = function() {
 };
 
 Trigger.prototype.BuildOutpostMessage = function() {
-	GUINotification([1], markForTranslation("This should be the place. Let's build that Outpost!"));
+	ChatNotification(1, [1], markForTranslation("This should be the place. Let's build that Outpost!"));
 };
 
 Trigger.prototype.BuildOutpostWrongTypeMessage = function() {
-	GUINotification([1], markForTranslation("Elder: Aren't you even capable of building an Outpost!? Shame on you, go and return to your father!"));
+	ChatNotification(2, [1], markForTranslation("Elder: Aren't you even capable of building an Outpost!? Shame on you, go and return to your father!"));
 };
 
 Trigger.prototype.BuildOutpostWrongPlaceMessage = function() {
-	GUINotification([1], markForTranslation("Elder: How can we use this Outpost if you didn't build it at the right place? Go and return to your father, I can't learn you anything!"));
+	ChatNotification(2, [1], markForTranslation("Elder: How can we use this Outpost if you didn't build it at the right place? Go and return to your father, I can't learn you anything!"));
 };
 
 Trigger.prototype.FlyAwayMessage = function() {
-	GUINotification([1], markForTranslation("Elder: Bandits are attacking our village! Hurry Away to the West, the way you came from! You won't survive a minute!"));
+	ChatNotification(2, [1], markForTranslation("Elder: Bandits are attacking our village! Hurry Away to the West, the way you came from! You won't survive a minute!"));
+	GUINotification([1], markForTranslation("Travel to the West."));
 };
 
 Trigger.prototype.ReinforcementsMessage = function() {
-	GUINotification([1], markForTranslation("Gaul Warrior: Let's teach those Bandits a lesson! Our scouts reported that there main camp is located to the south. Maybe we can find a path leading from the road to their camp. But let us build a Civil Center first!"));
+	ChatNotification(1, [1], markForTranslation("Gaul Warrior: Let's teach those Bandits a lesson! Our scouts reported that there main camp is located to the south. Maybe we can find a path leading from the road to their camp. But let us build a Civil Center first!"));
+	GUINotification([1], markForTranslation("Build a Civil Center, kill all Bandits and destroy their base."));
 };
 
 Trigger.prototype.FanaticRaidMessage = function() {
-	GUINotification([1], markForTranslation("Gaul Warrior: Beware! Enemies are upon us!"));
+	ChatNotification(1, [1], markForTranslation("Gaul Warrior: Beware! Enemies are upon us!"));
 };
 
 Trigger.prototype.FarmerMessage = function() {
-	GUINotification([1], markForTranslation("You're not one of those bandits, eh? They took my wife and children and ruined my life. I'll help you with whatever I can."));
+	ChatNotification(4, [1], markForTranslation("Farmer: You're not one of those bandits, eh? They took my wife and children and ruined my life. I'll help you with whatever I can."));
 };
 
 Trigger.prototype.TreasureFoundMessage = function() {
-	GUINotification([1], markForTranslation("Hmm, it seems that someone left a good amount of metal here. Let's put it to a good use!"));
+	ChatNotification(1, [1], markForTranslation("Hmm, it seems that someone left a good amount of metal here. Let's put it to a good use!"));
 };
 
 Trigger.prototype.DefeatPlayerOneMessage = function() {
@@ -359,7 +375,7 @@ Trigger.prototype.DefeatPlayerOneMessage = function() {
 };
 
 Trigger.prototype.DefeatPlayerTwoMessage = function() {
-	GUINotification([1], markForTranslation("Avenge us! Kill all the enemy bandits!"));
+	GUINotification([1], markForTranslation("We have been slain! Avenge us!"));
 };
 
 Trigger.prototype.DefeatPlayerThreeMessage = function() {
@@ -502,7 +518,7 @@ Trigger.prototype.FleeToTheEast = function(data) {
 
 	this.DoAfterDelay(200, "ReinforcementsMessage", {});
 
-	this.DoAfterDelay(60000, "FanaticRaid", {}); // attack after 60 seconds
+	this.DoAfterDelay(100000, "FanaticRaid", {}); // attack after 100 seconds
 };
 
 Trigger.prototype.FanaticRaid = function() {
@@ -537,7 +553,7 @@ Trigger.prototype.FanaticRaid = function() {
 
 	this.DoAfterDelay(5000, "FanaticRaidMessage", {}); // 5 seconds delay for the 'surprise-effect'
 	
-	data.delay = 300000; // after 5 minutes
+	data.delay = 450000; // after 7.5 minutes
 	data.interval = 300000; // every 5 minutes
 	cmpTrigger.RegisterTrigger("OnInterval", "BanditReinforcements", data);
 };
@@ -615,6 +631,9 @@ Trigger.prototype.BanditReinforcements = function(data) {
 var cmpTrigger = Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger);
 var data = {"enabled": true};
 
+cmpTrigger.RegisterTrigger("OnOwnershipChanged", "OwnershipChangedAction", data);
+cmpTrigger.RegisterTrigger("OnPlayerCommand", "PlayerCommandAction", data);
+
 // vars for data storage
 cmpTrigger.DifficultyMultiplier = 0.5; // 0.5 is easy, 0.7 is intermediate
 cmpTrigger.DialogID = 0; // var to keep track of the dialogs
@@ -646,5 +665,3 @@ cmpTrigger.RegisterTrigger("OnRange", "TreasureFound", data);
 
 // start storyline by posting the first dialog 
 cmpTrigger.DoAfterDelay(200, "DifficultyDialog", {});
-
-// cmpTrigger.DoAfterDelay(200, "SendMessage", {});

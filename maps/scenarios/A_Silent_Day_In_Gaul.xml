@@ -6,7 +6,7 @@
 		<SunColour r="0.501961" g="0.501961" b="0.247059"/>
 		<SunElevation angle="0.458739"/>
 		<SunRotation angle="-2.45754"/>
-		<TerrainAmbientColour r="0.717647" g="0.756863" b="0.815686"/>
+		<TerrainAmbientColour r="0.713726" g="0.756863" b="0.811765"/>
 		<UnitsAmbientColour r="0.54902" g="0.611765" b="0.709804"/>
 		<Fog>
 			<FogFactor>0.00265625</FogFactor>
@@ -27,13 +27,13 @@
 		<Postproc>
 			<Brightness>-0.0078125</Brightness>
 			<Contrast>1.01563</Contrast>
-			<Saturation>0.890625</Saturation>
+			<Saturation>0.734375</Saturation>
 			<Bloom>0.2</Bloom>
 			<PostEffect>hdr</PostEffect>
 		</Postproc>
 	</Environment>
 	<Camera>
-		<Position x="175.247" y="91.4888" z="31.5679"/>
+		<Position x="299.252" y="91.4659" z="118.408"/>
 		<Rotation angle="0"/>
 		<Declination angle="0.610865"/>
 	</Camera>
