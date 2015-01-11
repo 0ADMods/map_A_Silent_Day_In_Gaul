@@ -1,14 +1,14 @@
 // debug listeners
 Trigger.prototype.OwnershipChangedAction = function(data)
 {
-	warn("The OnOwnershipChanged event happened with the following data:");
-	warn(uneval(data));
+	//warn("The OnOwnershipChanged event happened with the following data:");
+	//warn(uneval(data));
 };
 
 Trigger.prototype.PlayerCommandAction = function(data)
 {
-	warn("The OnPlayerCommand event happened with the following data:");
-	warn(uneval(data));
+	//warn("The OnPlayerCommand event happened with the following data:");
+	//warn(uneval(data));
 };
 
 // disables the territory decay (for all players)
@@ -100,7 +100,7 @@ Trigger.prototype.DefeatConditionsPlayerOneAndThree = function() {
 		// if the player is currently active but needs to be defeated,
 		// mark that player as defeated
 		var cmpPlayer = TriggerHelper.GetPlayerComponent(PlayerID);
-		if (cmpPlayer.GetState() != "active") 
+		if ((!cmpPlayer) || (cmpPlayer.GetState() != "active"))
 			continue;
 		if (cmpPlayer.GetConquestCriticalEntitiesCount() == 0) {
 			// push end game messages depending on the defeated player
@@ -118,11 +118,14 @@ Trigger.prototype.DefeatConditionsPlayerOneAndThree = function() {
 
 Trigger.prototype.DefeatConditionsPlayerTwo = function() {
 	var cmpPlayer = TriggerHelper.GetPlayerComponent(2);
-	if (cmpPlayer.GetState() != "active") 
+	
+	if ((!cmpPlayer) || (cmpPlayer.GetState() != "active"))
 		return;	
+	
+	warn(uneval(cmpPlayer.GetPopulationCount()));
 	if (cmpPlayer.GetPopulationCount() == 0) {
-		warn("Marking Player 2 as defeated");
-		this.DoAfterDelay(0, "DefeatPlayerTwoMessage", {});
+		warn(uneval("Marking player 2 as defeated"));
+		this.DoAfterDelay(0, "DefeatPlayerTwoMessage", null);
 		TriggerHelper.DefeatPlayer(2);
 	}
 	this.checkingConquestCriticalEntities = false;
@@ -219,7 +222,7 @@ Trigger.prototype.FarmerGather = function(data) {
 };
 
 Trigger.prototype.FarmerTribute = function(data) {
-	// Every 30 seconds the Farmer player tributes all his food as long as he has more than 50
+	// Every 30 seconds the Farmer tributes all his food as long as he has more than 50
 
 	this.PlayerID = 4;
 	var cmpPlayer = TriggerHelper.GetPlayerComponent(this.PlayerID);
