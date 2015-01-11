@@ -7,7 +7,7 @@
 		<SunElevation angle="0.458739"/>
 		<SunRotation angle="-2.45754"/>
 		<TerrainAmbientColour r="0.713726" g="0.756863" b="0.811765"/>
-		<UnitsAmbientColour r="0.54902" g="0.611765" b="0.709804"/>
+		<UnitsAmbientColour r="0.654902" g="0.701961" b="0.776471"/>
 		<Fog>
 			<FogFactor>0.00265625</FogFactor>
 			<FogThickness>0.207031</FogThickness>
@@ -27,13 +27,13 @@
 		<Postproc>
 			<Brightness>-0.0078125</Brightness>
 			<Contrast>1.01563</Contrast>
-			<Saturation>0.734375</Saturation>
-			<Bloom>0.2</Bloom>
-			<PostEffect>hdr</PostEffect>
+			<Saturation>0.84375</Saturation>
+			<Bloom>0.1875</Bloom>
+			<PostEffect>default</PostEffect>
 		</Postproc>
 	</Environment>
 	<Camera>
-		<Position x="299.252" y="91.4659" z="118.408"/>
+		<Position x="104.087" y="91.2998" z="20.7318"/>
 		<Rotation angle="0"/>
 		<Declination angle="0.610865"/>
 	</Camera>
@@ -46,7 +46,6 @@
   "LockTeams": true,
   "Name": "A Silent Day In Gaul",
   "PlayerData": [
-    null,
     {
       "Civ": "gaul",
       "Colour": {
@@ -107,8 +106,7 @@
         "metal": 0,
         "stone": 0,
         "wood": 0
-      },
-      "Team": 1
+      }
     }
   ],
   "Preview": "",
