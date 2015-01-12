@@ -66,40 +66,38 @@ function ChatNotification(sender, recipient, message) {
 
 // modified version of the Conquest game type to allow for a cumstomized defeatcondition of Player 2 and some other niceties
 Trigger.prototype.DefeatConditionsPlayerOneAndThree = function(data) {
-	var cmpPlayerManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager);
 	var PlayerIDs = [1, 3];
-
 	for(var PlayerID of PlayerIDs) {
 		// if the player is currently active but needs to be defeated,
 		// mark that player as defeated
 		var cmpPlayer = TriggerHelper.GetPlayerComponent(PlayerID);
+
 		if ((!cmpPlayer) || (cmpPlayer.GetState() != "active"))
 			continue;
+
 		if (cmpPlayer.GetConquestCriticalEntitiesCount() == 0) {
 			// push end game messages depending on the defeated player
 			if (PlayerID == 1) {
-				this.DoAfterDelay(0, "DefeatPlayerOneMessage", {});
+				this.DefeatPlayerOneMessage();
 			} else if (PlayerID == 3) {
-				this.DoAfterDelay(0, "DefeatPlayerThreeMessage", {});
+				this.DefeatPlayerThreeMessage();
 				TriggerHelper.SetPlayerWon(1);
 			}
 			TriggerHelper.DefeatPlayer(PlayerID);
 		}
 	}
-	this.checkingConquestCriticalEntities = false;
 };
 
 Trigger.prototype.DefeatConditionsPlayerTwo = function(data) {
 	var cmpPlayer = TriggerHelper.GetPlayerComponent(2);
-	
 	if ((!cmpPlayer) || (cmpPlayer.GetState() != "active"))
 		return;	
 	
 	if (cmpPlayer.GetPopulationCount() == 0) {
-		this.DoAfterDelay(0, "DefeatPlayerTwoMessage", null);
+		this.DefeatPlayerTwoMessage();
 		TriggerHelper.DefeatPlayer(2);
+		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo");
 	}
-	this.checkingConquestCriticalEntities = false;
 };
 
 // END OF DEFEATCONDITIONS
@@ -159,8 +157,8 @@ Trigger.prototype.FarmerGather = function(data) {
 	cmd.player = 1;
 	ProcessCommand(4, cmd);
 
-	var cmpPlayer = TriggerHelper.GetPlayerComponent(4);
-	cmpPlayer.SetAlly(1);
+	var cmpPlayer = TriggerHelper.GetPlayerComponent(1);
+	cmpPlayer.SetAlly(4);
 
 	// find the gatherer and the field IDs and task the gatherer to the field
 	this.playerID = 4;
