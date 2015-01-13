@@ -27,14 +27,14 @@
 		<Postproc>
 			<Brightness>-0.0078125</Brightness>
 			<Contrast>1.01563</Contrast>
-			<Saturation>0.84375</Saturation>
+			<Saturation>0.796875</Saturation>
 			<Bloom>0.1875</Bloom>
-			<PostEffect>default</PostEffect>
+			<PostEffect>hdr</PostEffect>
 		</Postproc>
 	</Environment>
 	<Camera>
-		<Position x="159.92" y="92.9171" z="54.6634"/>
-		<Rotation angle="0.0850506"/>
+		<Position x="97.6737" y="93.4186" z="66.9387"/>
+		<Rotation angle="0"/>
 		<Declination angle="0.610865"/>
 	</Camera>
 	<ScriptSettings><![CDATA[
