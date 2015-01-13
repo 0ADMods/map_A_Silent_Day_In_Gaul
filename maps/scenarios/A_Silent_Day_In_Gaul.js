@@ -403,7 +403,8 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 
 	if (template != "structures/gaul_outpost") {
 		// disable defeat conditions
-		this.DisableTrigger("OnOwnershipChanged", "CheckDefeatConditions");
+		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerOneAndThree");
+		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo");
 
 		this.DoAfterDelay(0, "BuildOutpostWrongTypeMessage", {});
 		TriggerHelper.DefeatPlayer(1);
@@ -412,7 +413,8 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 
 	if (distance > 30) {
 		// disable defeat conditions
-		this.DisableTrigger("OnOwnershipChanged", "CheckDefeatConditions");
+		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerOneAndThree");
+		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo");
 
 		this.DoAfterDelay(0, "BuildOutpostWrongPlaceMessage", {});
 		TriggerHelper.DefeatPlayer(1);
