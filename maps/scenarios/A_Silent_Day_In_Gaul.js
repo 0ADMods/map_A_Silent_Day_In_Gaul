@@ -335,7 +335,7 @@ Trigger.prototype.FanaticRaidMessage = function() {
 };
 
 Trigger.prototype.FarmerMessage = function() {
-	ChatNotification(4, [1], markForTranslation("Farmer: You're not one of those bandits, eh? They took my wife and children and ruined my life. I'll help you with whatever I can."));
+	ChatNotification(4, [1], markForTranslation("You're not one of those bandits, eh? They took my wife and children and ruined my life. I'll help you with whatever I can."));
 };
 
 Trigger.prototype.TreasureFoundMessage = function() {

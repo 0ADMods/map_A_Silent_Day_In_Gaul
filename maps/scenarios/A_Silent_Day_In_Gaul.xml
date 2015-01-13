@@ -33,7 +33,7 @@
 		</Postproc>
 	</Environment>
 	<Camera>
-		<Position x="97.6737" y="93.4186" z="66.9387"/>
+		<Position x="72.0306" y="75.2092" z="89.5454"/>
 		<Rotation angle="0"/>
 		<Declination angle="0.610865"/>
 	</Camera>
@@ -46,7 +46,6 @@
   "LockTeams": true,
   "Name": "A Silent Day In Gaul",
   "PlayerData": [
-    null,
     {
       "Civ": "gaul",
       "Colour": {
@@ -54,6 +53,7 @@
         "g": 128,
         "r": 0
       },
+      "Name": "You",
       "Resources": {
         "food": 0,
         "metal": 0,
@@ -82,6 +82,7 @@
         "g": 20,
         "r": 150
       },
+      "Name": "Gaul Villagers",
       "Team": 0
     },
     {
@@ -92,6 +93,7 @@
         "g": 64,
         "r": 128
       },
+      "Name": "Bandits",
       "Team": 1
     },
     {
@@ -102,6 +104,7 @@
         "g": 128,
         "r": 0
       },
+      "Name": "Farmer",
       "Resources": {
         "food": 0,
         "metal": 0,
