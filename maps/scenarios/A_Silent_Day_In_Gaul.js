@@ -45,6 +45,16 @@ function GUINotification(players, message) {
 	});
 }
 
+function ClearGUINotifications() {
+	var cmpGUIInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface);
+
+	for (var i in cmpGUIInterface.timeNotifications)
+	{
+			cmpGUIInterface.timeNotifications.splice(i);
+			return;
+	}
+}
+
 /* Post a chat message
  * @param sender: PlayerID of the player that sends the message
  * @param recipient: Array of PlayerIDs that will see the message
@@ -127,7 +137,12 @@ Trigger.prototype.PlayerCommandHandler = function(data) {
 			"enabled": true,
 		};
 		cmpTrigger.RegisterTrigger("OnRange", "VisitVillage", data);
-		this.DoAfterDelay(200, "IntroductionMessage", {});
+		
+		//Enable objective message
+		data.enabled = true;
+		data.delay = 1000; // after 1 seconds
+		data.interval = this.messageTimeout;
+		this.RegisterTrigger("OnInterval", "ObjectiveVisitVillage", data);
 	}
 
 	// VisitVillageDialog
@@ -255,10 +270,6 @@ Trigger.prototype.DifficultyDialog = function() {
 	});
 };
 
-Trigger.prototype.IntroductionMessage = function() {
-	GUINotification([1], markForTranslation("Visit the Elder in the Village to the East."));
-};
-
 Trigger.prototype.VisitVillageDialog = function() {
 	this.DialogID = 2;
 	var cmpGUIInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface);
@@ -299,8 +310,7 @@ Trigger.prototype.VisitVillageDialog = function() {
 
 Trigger.prototype.VisitVillageMessage = function() {
 	ChatNotification(2, [1], markForTranslation("Elder: Very good! I love that eagerness! I have a task for you: I need you to rebuild the old Outpost to the West of here. We need it to signal to other tribes. Good luck."));
-	GUINotification([1], markForTranslation("Build an Outpost on the hill to the west."));
-
+	
 	// add resources required to build an Outpost
 	var resources = {
 		"wood": 80,
@@ -321,13 +331,12 @@ Trigger.prototype.BuildOutpostWrongPlaceMessage = function() {
 };
 
 Trigger.prototype.FlyAwayMessage = function() {
-	ChatNotification(2, [1], markForTranslation("Elder: Bandits are attacking our village! Hurry Away to the West, the way you came from! You won't survive a minute!"));
-	GUINotification([1], markForTranslation("Travel to the West."));
+	ChatNotification(2, [1], markForTranslation("Elder: Bandits are attacking our village! Follow the road back to the West, the way you came from! You won't survive a minute!"));
+
 };
 
 Trigger.prototype.ReinforcementsMessage = function() {
 	ChatNotification(1, [1], markForTranslation("Gaul Warrior: Let's teach those Bandits a lesson! Our scouts reported that there main camp is located to the south. Maybe we can find a path leading from the road to their camp. But let us build a Civil Center first!"));
-	GUINotification([1], markForTranslation("Build a Civil Center, kill all Bandits and destroy their base."));
 };
 
 Trigger.prototype.FanaticRaidMessage = function() {
@@ -335,7 +344,7 @@ Trigger.prototype.FanaticRaidMessage = function() {
 };
 
 Trigger.prototype.FarmerMessage = function() {
-	ChatNotification(4, [1], markForTranslation("You're not one of those bandits, eh? They took my wife and children and ruined my life. I'll help you with whatever I can."));
+	ChatNotification(4, [1], markForTranslation("You're not one of those bandits, eh? They took my wife and children and ruined my life. I'll help you by giving you the harvest of my farm."));
 };
 
 Trigger.prototype.TreasureFoundMessage = function() {
@@ -343,18 +352,39 @@ Trigger.prototype.TreasureFoundMessage = function() {
 };
 
 Trigger.prototype.DefeatPlayerOneMessage = function() {
-	GUINotification([1], markForTranslation("Shame on you! Now the bandits can do whatever they like! Nothing can stop them now!"));
+	ChatNotification([1], markForTranslation("Shame on you! Now the bandits can do whatever they like! Nothing can stop them now!"));
 };
 
 Trigger.prototype.DefeatPlayerTwoMessage = function() {
-	GUINotification([1], markForTranslation("We have been slain! Avenge us!"));
+	ChatNotification(2, [1], markForTranslation("We have been slain! Avenge us!"));
 };
 
 Trigger.prototype.DefeatPlayerThreeMessage = function() {
 	GUINotification([1], markForTranslation("Well done! You've killed all the bandits!"));
 };
 
+// Objective messages
+Trigger.prototype.ObjectiveVisitVillage = function() {
+	GUINotification([1], markForTranslation("Visit the Elder in the Village to the East."));
+};
+
+Trigger.prototype.ObjectiveBuildOutpost = function() {
+	GUINotification([1], markForTranslation("Build an Outpost on the hill to the west."));
+};
+
+Trigger.prototype.ObjectiveFleeToWest = function() {
+	GUINotification([1], markForTranslation("Follow the road to the West."));
+};
+
+Trigger.prototype.ObjectiveKillBandits = function() {
+	GUINotification([1], markForTranslation("Build a Civil Center, kill all Bandits and destroy their base."));
+};
+
+// End of Objective messages
+
 // END OF MESSAGES AND DIALOGUES
+
+
 
 // STORYLINE (IN SEQUENCE)
 
@@ -362,9 +392,10 @@ Trigger.prototype.DefeatPlayerThreeMessage = function() {
  * After this dialog, this trigger is disabled and the BuildOutpost trigger enabled
  */
 Trigger.prototype.VisitVillage = function(data) {
-	// disable current trigger, execute commands and enable the next trigger(s)
+	// disable current trigger(s), execute commands and enable the next trigger(s)
 	this.DisableTrigger("OnRange", "VisitVillage");
-	
+	this.DisableTrigger("OnInterval", "ObjectiveVisitVillage");
+
 	// small delay for GUI notifications to prevent instant responses/reactions (technically not necessary but feels more natural)
 	this.DoAfterDelay(200, "VisitVillageDialog", {});
 	
@@ -378,6 +409,12 @@ Trigger.prototype.VisitVillage = function(data) {
 	};
 	this.RegisterTrigger("OnRange", "BuildOutpost", data);
 
+	//Enable objective message
+	data.enabled = true;
+	data.delay = 1000; // after 1 seconds
+	data.interval = this.messageTimeout; 
+	this.RegisterTrigger("OnInterval", "ObjectiveBuildOutpost", data);
+	ClearGUINotifications();
 	this.RegisterTrigger("OnStructureBuilt", "SpawnAndAttackAlliedVillage", {"enabled" : true});
 };
 
@@ -392,6 +429,7 @@ Trigger.prototype.BuildOutpost = function(data) {
 
 Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 	this.DisableTrigger("OnStructureBuilt", "SpawnAndAttackAlliedVillage");
+	this.DisableTrigger("OnInterval", "ObjectiveBuildOutpost");
 
 	// check if the player has built the correct building and at the right place, player 1 loses if that isn't the case
 	var entity1 = data["building"];
@@ -457,11 +495,11 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 		"requiredComponent": IID_UnitAI, // only count units in range
 		"enabled": true,
 	};
-	this.RegisterTrigger("OnRange", "FleeToTheEast", data);
+	this.RegisterTrigger("OnRange", "FleeToTheWest", data);
 };
 
-Trigger.prototype.FleeToTheEast = function(data) {
-	this.DisableTrigger("OnRange", "FleeToTheEast");
+Trigger.prototype.FleeToTheWest = function(data) {
+	this.DisableTrigger("OnRange", "FleeToTheWest");
 
 	this.PlayerID = 1;
 	var cmpPlayerManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager);
@@ -491,6 +529,13 @@ Trigger.prototype.FleeToTheEast = function(data) {
 	var reinforcements = TriggerHelper.SpawnUnitsFromTriggerPoints(spawnPoint, "units/gaul_champion_infantry", this.attackSize, this.PlayerID);
 
 	this.DoAfterDelay(200, "ReinforcementsMessage", {});
+
+	//Enable objective message
+	ClearGUINotifications();
+	data.enabled = true;
+	data.delay = 1000; // after 1 seconds
+	data.interval = this.messageTimeout;
+	this.RegisterTrigger("OnInterval", "ObjectiveKillBandits", data);
 
 	this.DoAfterDelay(100000, "FanaticRaid", {}); // attack after 100 seconds
 };
@@ -608,8 +653,9 @@ var data = {"enabled": true};
 // vars for data storage
 cmpTrigger.DifficultyMultiplier = 0.5; // 0.5 is easy, 0.7 is intermediate
 cmpTrigger.DialogID = 0; // var to keep track of the dialogs
-cmpTrigger.attackSize = 5; // initial amount for Bandit reinforcements
-cmpTrigger.attackSizeIncrement = 5; // amount to add to the attackSize each raid
+cmpTrigger.attackSize = 3; // initial amount for Bandit reinforcements
+cmpTrigger.attackSizeIncrement = 4; // amount to add to the attackSize each raid
+cmpTrigger.messageTimeout = 20000;
 
 // arm a number of triggers that are required to run along side the storyline
 cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerOneAndThree", data);
