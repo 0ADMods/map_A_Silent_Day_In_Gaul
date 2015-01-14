@@ -45,6 +45,9 @@ function GUINotification(players, message) {
 	});
 }
 
+/* Remove current GUINotification(s)
+ * Doesn't need any parameters.
+ */
 function ClearGUINotifications() {
 	var cmpGUIInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface);
 
@@ -60,7 +63,6 @@ function ClearGUINotifications() {
  * @param recipient: Array of PlayerIDs that will see the message
  * @param message: the to be posted message in a string
  */
-
 function ChatNotification(sender, recipient, message) {
 	var cmd = {
 		"type" : "chat",
@@ -138,7 +140,7 @@ Trigger.prototype.PlayerCommandHandler = function(data) {
 		};
 		cmpTrigger.RegisterTrigger("OnRange", "VisitVillage", data);
 		
-		//Enable objective message
+		//Enable first objective message
 		data.enabled = true;
 		data.delay = 1000; // after 1 seconds
 		data.interval = this.messageTimeout;
