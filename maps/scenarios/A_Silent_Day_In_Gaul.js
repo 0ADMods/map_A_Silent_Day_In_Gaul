@@ -334,7 +334,6 @@ Trigger.prototype.BuildOutpostWrongPlaceMessage = function() {
 
 Trigger.prototype.FlyAwayMessage = function() {
 	ChatNotification(2, [1], markForTranslation("Elder: Bandits are attacking our village! Follow the road back to the West, the way you came from! You won't survive a minute!"));
-
 };
 
 Trigger.prototype.ReinforcementsMessage = function() {
@@ -386,8 +385,6 @@ Trigger.prototype.ObjectiveKillBandits = function() {
 
 // END OF MESSAGES AND DIALOGUES
 
-
-
 // STORYLINE (IN SEQUENCE)
 
 /* This function fires a dialog as soon as the player comes in range of the Triggerpoint located in the Red Village
@@ -412,11 +409,12 @@ Trigger.prototype.VisitVillage = function(data) {
 	this.RegisterTrigger("OnRange", "BuildOutpost", data);
 
 	//Enable objective message
+	ClearGUINotifications();
 	data.enabled = true;
 	data.delay = 1000; // after 1 seconds
 	data.interval = this.messageTimeout; 
 	this.RegisterTrigger("OnInterval", "ObjectiveBuildOutpost", data);
-	ClearGUINotifications();
+
 	this.RegisterTrigger("OnStructureBuilt", "SpawnAndAttackAlliedVillage", {"enabled" : true});
 };
 
@@ -463,9 +461,9 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 
 	// spawn attackers
 	var spawnPoint = "C";
-	this.attackSize = 5;
+	this.attackNum = 5;
 	this.PlayerID = 3;
-	var intruders = TriggerHelper.SpawnUnitsFromTriggerPoints(spawnPoint, "units/gaul_champion_fanatic", this.attackSize, this.PlayerID);
+	var intruders = TriggerHelper.SpawnUnitsFromTriggerPoints(spawnPoint, "units/gaul_champion_fanatic", this.attackNum, this.PlayerID);
 
 	for (var origin in intruders) {
 		var cmd = null;
@@ -486,9 +484,7 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 		cmd.targetClasses = { "attack": ["Unit", "Structure"] };
 		ProcessCommand(3, cmd);
 	}
-
-	this.DoAfterDelay(5000, "FlyAwayMessage", {});
-
+	
 	var entities = cmpTrigger.GetTriggerPoints("A");
 	data = {
 		"entities": entities, // central points to calculate the range circles
@@ -498,10 +494,21 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 		"enabled": true,
 	};
 	this.RegisterTrigger("OnRange", "FleeToTheWest", data);
+
+	this.DoAfterDelay(5000, "FlyAwayMessage", {});
+
+	//Enable objective message
+	ClearGUINotifications();
+	data.enabled = true;
+	data.delay = 5000; // after 1 seconds
+	data.interval = this.messageTimeout;
+	this.RegisterTrigger("OnInterval", "ObjectiveFleeToWest", data);
+
 };
 
 Trigger.prototype.FleeToTheWest = function(data) {
 	this.DisableTrigger("OnRange", "FleeToTheWest");
+	this.DisableTrigger("OnInterval", "ObjectiveFleeToWest");
 
 	this.PlayerID = 1;
 	var cmpPlayerManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager);
@@ -526,9 +533,9 @@ Trigger.prototype.FleeToTheWest = function(data) {
 
 	// spawn reinforcements
 	var spawnPoint = "A";
-	this.attackSize = 5;
+	this.reinforcementSize = 5;
 	this.PlayerID = 1;
-	var reinforcements = TriggerHelper.SpawnUnitsFromTriggerPoints(spawnPoint, "units/gaul_champion_infantry", this.attackSize, this.PlayerID);
+	var reinforcements = TriggerHelper.SpawnUnitsFromTriggerPoints(spawnPoint, "units/gaul_champion_infantry", this.reinforcementSize, this.PlayerID);
 
 	this.DoAfterDelay(200, "ReinforcementsMessage", {});
 
@@ -645,6 +652,7 @@ Trigger.prototype.BanditReinforcements = function(data) {
 	cmd.targetClasses = { "attack": ["Unit", "Structure"] };
 	cmd.queued = true;
 	ProcessCommand(3, cmd);
+	this.DoAfterDelay(0, "FanaticRaidMessage");
 };
 
 // END OF STORYLINE
