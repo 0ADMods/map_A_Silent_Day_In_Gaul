@@ -525,8 +525,9 @@ Trigger.prototype.FleeToTheWest = function(data) {
 
 	// add resources required to build a Civil Center
 	var resources = {
-		"wood": 500,
-		"stone": 500,
+		"food": 250,
+		"wood": 700,
+		"stone": 700,
 		"metal": 500
 	};
 	AddPlayerResources(this.PlayerID, resources);
@@ -536,6 +537,8 @@ Trigger.prototype.FleeToTheWest = function(data) {
 	this.reinforcementSize = 5;
 	this.PlayerID = 1;
 	var reinforcements = TriggerHelper.SpawnUnitsFromTriggerPoints(spawnPoint, "units/gaul_champion_infantry", this.reinforcementSize, this.PlayerID);
+	reinforcements = TriggerHelper.SpawnUnitsFromTriggerPoints(spawnPoint, "units/gaul_support_female_citizen", this.reinforcementSize, this.PlayerID);
+
 
 	this.DoAfterDelay(200, "ReinforcementsMessage", {});
 
@@ -582,7 +585,7 @@ Trigger.prototype.FanaticRaid = function() {
 	this.DoAfterDelay(5000, "FanaticRaidMessage", {}); // 5 seconds delay for the 'surprise-effect'
 	
 	data.delay = 450000; // after 7.5 minutes
-	data.interval = 300000; // every 5 minutes
+	data.interval = Math.round(250000/this.DifficultyMultiplier); // every 8.3 minutes for easy and every 6 minutes for intermediate 
 	cmpTrigger.RegisterTrigger("OnInterval", "BanditReinforcements", data);
 };
 
@@ -591,6 +594,7 @@ Trigger.prototype.BanditReinforcements = function(data) {
 	var reinforcementPoint = "F";
 	this.attackSize = Math.round(this.attackSize + this.attackSizeIncrement);
 	this.attackSizeIncrement = (this.attackSizeIncrement * this.DifficultyMultiplier);
+	warn(uneval(this.attackSize));
 	var reinforcements = TriggerHelper.SpawnUnitsFromTriggerPoints(reinforcementPoint, "units/gaul_champion_fanatic", this.attackSize, this.PlayerID);
 
 	// check if the Bandit base needs reinforcement and issue a move command to the base if needed 
@@ -663,8 +667,8 @@ var data = {"enabled": true};
 // vars for data storage
 cmpTrigger.DifficultyMultiplier = 0.5; // 0.5 is easy, 0.7 is intermediate
 cmpTrigger.DialogID = 0; // var to keep track of the dialogs
-cmpTrigger.attackSize = 3; // initial amount for Bandit reinforcements
-cmpTrigger.attackSizeIncrement = 4; // amount to add to the attackSize each raid
+cmpTrigger.attackSize = 4; // initial amount for Bandit reinforcements
+cmpTrigger.attackSizeIncrement = 2; // amount to add to the attackSize each raid
 cmpTrigger.messageTimeout = 20000;
 
 // arm a number of triggers that are required to run along side the storyline
