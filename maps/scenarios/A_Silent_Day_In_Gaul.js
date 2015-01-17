@@ -594,7 +594,7 @@ Trigger.prototype.BanditReinforcements = function(data) {
 	var reinforcementPoint = "F";
 	this.attackSize = Math.round(this.attackSize + this.attackSizeIncrement);
 	this.attackSizeIncrement = (this.attackSizeIncrement * this.DifficultyMultiplier);
-	warn(uneval(this.attackSize));
+
 	var reinforcements = TriggerHelper.SpawnUnitsFromTriggerPoints(reinforcementPoint, "units/gaul_champion_fanatic", this.attackSize, this.PlayerID);
 
 	// check if the Bandit base needs reinforcement and issue a move command to the base if needed 
