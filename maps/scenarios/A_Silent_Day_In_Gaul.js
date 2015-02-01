@@ -106,7 +106,6 @@ Trigger.prototype.DefeatConditionsPlayerOneAndThree = function(data) {
 			continue;
 		// this additional check for the presence of of the defence tower is needed because the Defence Tower doesn't have a ConquestCritical flag 
 		if ( (PlayerID == 3) && ((structures.length == 0) && (cmpPlayer.GetConquestCriticalEntitiesCount() == 0)) ) {
-			warn("Defeating Player 3");
 			this.DefeatPlayerThreeMessage();
 			TriggerHelper.SetPlayerWon(1);
 			TriggerHelper.DefeatPlayer(PlayerID);
@@ -227,12 +226,10 @@ Trigger.prototype.FarmerGather = function(data) {
 
 Trigger.prototype.FarmerTribute = function(data) {
 	// Every 30 seconds the Farmer tributes all his food as long as he has more than 50
-
 	this.PlayerID = 4;
 	var cmpPlayer = TriggerHelper.GetPlayerComponent(this.PlayerID);
 
 	var resource = {"food" : cmpPlayer.GetResourceCounts()["food"]};
-
 	if (resource["food"] < 50)
 		return;
 
