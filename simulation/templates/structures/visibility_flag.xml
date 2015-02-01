@@ -18,6 +18,7 @@
   <Visibility>
     <RetainInFog>true</RetainInFog>
     <AlwaysVisible>false</AlwaysVisible>
+    <Preview>false</Preview>
   </Visibility>
   <Vision>
     <Range>20</Range>

@@ -78,7 +78,25 @@ function ChatNotification(sender, recipient, message) {
 
 // modified version of the Conquest game type to allow for a cumstomized defeatcondition of Player 2 and some other niceties
 Trigger.prototype.DefeatConditionsPlayerOneAndThree = function(data) {
+	if(this.checkingConquestCriticalEntities) 
+		return;
+
+	this.checkingConquestCriticalEntities = true;
 	var PlayerIDs = [1, 3];
+	
+	var cmpRangeManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_RangeManager);
+	var entities = cmpRangeManager.GetEntitiesByPlayer(3);
+
+	var cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
+	var structures = [];
+
+	// search for all defense towers structures and put the IDs in an array
+	for(var ent of entities) {
+		var template = cmpTemplateManager.GetCurrentTemplateName(ent);
+		if (template == "structures/brit_defense_tower")
+			structures.push(ent);
+	}
+
 	for(var PlayerID of PlayerIDs) {
 		// if the player is currently active but needs to be defeated,
 		// mark that player as defeated
@@ -86,18 +104,18 @@ Trigger.prototype.DefeatConditionsPlayerOneAndThree = function(data) {
 
 		if ((!cmpPlayer) || (cmpPlayer.GetState() != "active"))
 			continue;
-
-		if (cmpPlayer.GetConquestCriticalEntitiesCount() == 0) {
-			// push end game messages depending on the defeated player
-			if (PlayerID == 1) {
-				this.DefeatPlayerOneMessage();
-			} else if (PlayerID == 3) {
-				this.DefeatPlayerThreeMessage();
-				TriggerHelper.SetPlayerWon(1);
-			}
+		// this additional check for the presence of of the defence tower is needed because the Defence Tower doesn't have a ConquestCritical flag 
+		if ( (PlayerID == 3) && ((structures.length == 0) && (cmpPlayer.GetConquestCriticalEntitiesCount() == 0)) ) {
+			warn("Defeating Player 3");
+			this.DefeatPlayerThreeMessage();
+			TriggerHelper.SetPlayerWon(1);
+			TriggerHelper.DefeatPlayer(PlayerID);
+		} else if ( (PlayerID == 1) && (cmpPlayer.GetConquestCriticalEntitiesCount() == 0)) {
+			this.DefeatPlayerOneMessage();
 			TriggerHelper.DefeatPlayer(PlayerID);
 		}
 	}
+	this.checkingConquestCriticalEntities = false;
 };
 
 Trigger.prototype.DefeatConditionsPlayerTwo = function(data) {
@@ -122,10 +140,10 @@ Trigger.prototype.PlayerCommandHandler = function(data) {
 	// DifficultyDialog
 	if (this.DialogID == 1) {
 		if (data.cmd.answer == "button1") {
-			this.DifficultyMultiplier = 1; // Easy difficulty
+			this.DifficultyMultiplier = this.DifficultyMultiplierEasy; // Easy difficulty
 			this.DialogID = 0; //reset the dialog var
 		} else {
-			this.DifficultyMultiplier = 1.3; // Intermediate difficulty
+			this.DifficultyMultiplier = this.DifficultyMultiplierIntermediate; // Intermediate difficulty
 			this.DialogID = 0;  // reset the dialog var
 		}
 
@@ -353,7 +371,7 @@ Trigger.prototype.TreasureFoundMessage = function() {
 };
 
 Trigger.prototype.DefeatPlayerOneMessage = function() {
-	ChatNotification([1], markForTranslation("Shame on you! Now the bandits can do whatever they like! Nothing can stop them now!"));
+	GUINotification([1], markForTranslation("Shame on you! Now the bandits can do whatever they like! Nothing can stop them now!"));
 };
 
 Trigger.prototype.DefeatPlayerTwoMessage = function() {
@@ -444,7 +462,7 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerOneAndThree");
 		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo");
 
-		this.DoAfterDelay(0, "BuildOutpostWrongTypeMessage", {});
+		this.BuildOutpostWrongTypeMessage();
 		TriggerHelper.DefeatPlayer(1);
 		return;
 	}
@@ -454,7 +472,7 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerOneAndThree");
 		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo");
 
-		this.DoAfterDelay(0, "BuildOutpostWrongPlaceMessage", {});
+		this.BuildOutpostWrongPlaceMessage();
 		TriggerHelper.DefeatPlayer(1);
 		return;
 	}
@@ -595,15 +613,16 @@ Trigger.prototype.BanditReinforcements = function(data) {
 	this.attackSize = Math.round(this.attackSize + this.attackSizeIncrement);
 	this.attackSizeIncrement = (this.attackSizeIncrement * this.DifficultyMultiplier);
 
-	var reinforcements = TriggerHelper.SpawnUnitsFromTriggerPoints(reinforcementPoint, "units/gaul_champion_fanatic", this.attackSize, this.PlayerID);
+	// check if the Bandit base needs reinforcement and issue a reinforcement army (so that the bandit army in the bandit base = Player1PopCount/2*DifficultyMultiplier)
+		// after that spawn an army that attacks towards 'A' or, if it exists, the Civil Center built by the Human player
+	var cmpPlayer = TriggerHelper.GetPlayerComponent(3);
+	var cmpPlayer1 = TriggerHelper.GetPlayerComponent(1);
+	if ( (cmpPlayer1.GetPopulationCount()/2)*this.DifficultyMultiplier > cmpPlayer.GetPopulationCount()) {
+		var reinforcements = TriggerHelper.SpawnUnitsFromTriggerPoints(reinforcementPoint, "units/gaul_champion_fanatic", ( cmpPlayer1.GetPopulationCount()/2*this.DifficultyMultiplier - cmpPlayer.GetPopulationCount() ), this.PlayerID);
 
-	// check if the Bandit base needs reinforcement and issue a move command to the base if needed 
-		// else attack towards 'A' or, if it exists, the Civil Center built by the Human player
-	for (var origin in reinforcements) {
-		var cmd = null;
+		for (var origin in reinforcements) {
+			var cmd = null;
 
-		var cmpPlayer = TriggerHelper.GetPlayerComponent(3);
-		if (cmpPlayer.GetPopulationCount() < (5 + this.attackSize)) {
 			for(var target of this.GetTriggerPoints("D")) {
 				var cmpPosition = Engine.QueryInterface(target, IID_Position);
 				if (!cmpPosition || !cmpPosition.IsInWorld)
@@ -616,9 +635,14 @@ Trigger.prototype.BanditReinforcements = function(data) {
 			cmd.entities = reinforcements[origin];
 			cmd.queued = true;
 			ProcessCommand(3, cmd);
-			break;
 		}
+	}
 
+	// prepare vars for next army
+	var cmd = null;
+	var reinforcements = TriggerHelper.SpawnUnitsFromTriggerPoints(reinforcementPoint, "units/gaul_champion_fanatic", this.attackSize, this.PlayerID);
+
+	for (var origin in reinforcements) {
 		for(var target of this.GetTriggerPoints("A")) {
 			var cmpPosition = Engine.QueryInterface(target, IID_Position);
 			if (!cmpPosition || !cmpPosition.IsInWorld)
@@ -646,11 +670,11 @@ Trigger.prototype.BanditReinforcements = function(data) {
 				cmd = cmpPosition.GetPosition();
 			}
 		}
-
-		if(!cmd)
-			return;
 	}
 
+	if(!cmd)
+		return;
+	
 	cmd.type = "attack-walk";
 	cmd.entities = reinforcements[origin];
 	cmd.targetClasses = { "attack": ["Unit", "Structure"] };
@@ -665,7 +689,8 @@ var cmpTrigger = Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger);
 var data = {"enabled": true};
 
 // vars for data storage
-cmpTrigger.DifficultyMultiplier = 0.5; // 0.5 is easy, 0.7 is intermediate
+cmpTrigger.DifficultyMultiplierEasy = 1.0; // 1.0 is easy, 1.3 is intermediate
+cmpTrigger.DifficultyMultiplierIntermediate = 1.3;
 cmpTrigger.DialogID = 0; // var to keep track of the dialogs
 cmpTrigger.attackSize = 4; // initial amount for Bandit reinforcements
 cmpTrigger.attackSizeIncrement = 2; // amount to add to the attackSize each raid
