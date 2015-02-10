@@ -107,6 +107,7 @@ Trigger.prototype.DefeatConditionsPlayerOneAndThree = function(data) {
 		// this additional check for the presence of of the defence tower is needed because the Defence Tower doesn't have a ConquestCritical flag 
 		if ( (PlayerID == 3) && ((structures.length == 0) && (cmpPlayer.GetConquestCriticalEntitiesCount() == 0)) ) {
 			this.DefeatPlayerThreeMessage();
+			this.DisableTrigger("OnInterval", "ObjectiveKillBandits");
 			TriggerHelper.SetPlayerWon(1);
 			TriggerHelper.DefeatPlayer(PlayerID);
 		} else if ( (PlayerID == 1) && (cmpPlayer.GetConquestCriticalEntitiesCount() == 0)) {
@@ -178,6 +179,10 @@ Trigger.prototype.InitDiplomacies = function() {
 
 	cmpPlayer = TriggerHelper.GetPlayerComponent(4);
 	cmpPlayer.SetNeutral(1);
+	cmpPlayer.SetAlly(3);
+
+	cmpPlayer = TriggerHelper.GetPlayerComponent(3);
+	cmpPlayer.SetAlly(4);
 };
 
 Trigger.prototype.FarmerGather = function(data) {
@@ -496,7 +501,7 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 		cmd.type = "attack-walk";
 		cmd.entities = intruders[origin];
 		cmd.queued = true;
-		cmd.targetClasses = { "attack": ["Unit", "Structure"] };
+		cmd.targetClasses = { "attack": ["Unit"] };
 		ProcessCommand(3, cmd);
 	}
 	
