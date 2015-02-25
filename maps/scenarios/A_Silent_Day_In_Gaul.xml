@@ -33,9 +33,9 @@
 		</Postproc>
 	</Environment>
 	<Camera>
-		<Position x="167.318" y="56.1461" z="377.058"/>
-		<Rotation angle="-0.216707"/>
-		<Declination angle="0.610864"/>
+		<Position x="223.069" y="109.842" z="74.5147"/>
+		<Rotation angle="0.038785"/>
+		<Declination angle="0.610866"/>
 	</Camera>
 	<ScriptSettings><![CDATA[
 {
@@ -46,7 +46,6 @@
   "LockTeams": true,
   "Name": "A Silent Day In Gaul",
   "PlayerData": [
-    null,
     {
       "Civ": "gaul",
       "Colour": {
@@ -1171,7 +1170,7 @@
 			<Template>other/palisades_rocks_curve</Template>
 			<Player>3</Player>
 			<Position x="372.90226" z="45.62403"/>
-			<Orientation y="1.02392"/>
+			<Orientation y="1.1054"/>
 			<Actor seed="40846"/>
 		</Entity>
 		<Entity uid="187">
@@ -1184,21 +1183,21 @@
 		<Entity uid="188">
 			<Template>other/palisades_rocks_curve</Template>
 			<Player>3</Player>
-			<Position x="330.19626" z="65.3057"/>
+			<Position x="329.71848" z="65.48952"/>
 			<Orientation y="-3.04918"/>
 			<Actor seed="27592"/>
 		</Entity>
 		<Entity uid="189">
 			<Template>other/palisades_rocks_end</Template>
 			<Player>3</Player>
-			<Position x="337.35084" z="78.18493"/>
+			<Position x="336.61933" z="78.78624"/>
 			<Orientation y="-2.29926"/>
 			<Actor seed="9738"/>
 		</Entity>
 		<Entity uid="190">
 			<Template>other/palisades_rocks_straight</Template>
 			<Player>3</Player>
-			<Position x="334.162" z="73.90067"/>
+			<Position x="333.56897" z="74.14972"/>
 			<Orientation y="-2.56232"/>
 			<Actor seed="3172"/>
 		</Entity>
@@ -1303,42 +1302,42 @@
 		<Entity uid="208">
 			<Template>units/gaul_champion_fanatic</Template>
 			<Player>3</Player>
-			<Position x="355.84131" z="51.63637"/>
+			<Position x="340.5894" z="50.84675"/>
 			<Orientation y="-0.59954"/>
 			<Actor seed="2020"/>
 		</Entity>
 		<Entity uid="209">
 			<Template>units/gaul_infantry_slinger_a</Template>
 			<Player>3</Player>
-			<Position x="373.93421" z="64.96732"/>
+			<Position x="379.30246" z="65.13357"/>
 			<Orientation y="-0.81717"/>
 			<Actor seed="34692"/>
 		</Entity>
 		<Entity uid="210">
 			<Template>units/gaul_infantry_slinger_a</Template>
 			<Player>3</Player>
-			<Position x="345.31901" z="56.7437"/>
+			<Position x="339.47095" z="55.14071"/>
 			<Orientation y="0.95043"/>
 			<Actor seed="49050"/>
 		</Entity>
 		<Entity uid="211">
 			<Template>units/gaul_infantry_javelinist_a</Template>
 			<Player>3</Player>
-			<Position x="364.46128" z="72.85497"/>
+			<Position x="365.90311" z="83.41308"/>
 			<Orientation y="-1.97701"/>
 			<Actor seed="782"/>
 		</Entity>
 		<Entity uid="212">
 			<Template>units/gaul_infantry_javelinist_a</Template>
 			<Player>3</Player>
-			<Position x="347.29355" z="64.37343"/>
+			<Position x="339.2768" z="63.66431"/>
 			<Orientation y="0.0337"/>
 			<Actor seed="8122"/>
 		</Entity>
 		<Entity uid="213">
 			<Template>units/gaul_infantry_spearman_b</Template>
 			<Player>3</Player>
-			<Position x="349.41034" z="53.39275"/>
+			<Position x="344.8942" z="50.21113"/>
 			<Orientation y="0.00031"/>
 			<Actor seed="40286"/>
 		</Entity>
@@ -2019,56 +2018,56 @@
 		</Entity>
 		<Entity uid="365">
 			<Template>actor|props/special/eyecandy/wheel_laying.xml</Template>
-			<Position x="380.33588" z="68.71862"/>
+			<Position x="382.6919" z="68.93191"/>
 			<Orientation y="2.35621"/>
 			<Actor seed="20680"/>
 		</Entity>
 		<Entity uid="367">
 			<Template>gaia/special_treasure_wood</Template>
 			<Player>0</Player>
-			<Position x="379.92283" z="73.04004"/>
+			<Position x="382.26984" z="73.147"/>
 			<Orientation y="2.35621"/>
 			<Actor seed="24268"/>
 		</Entity>
 		<Entity uid="368">
 			<Template>other/bench</Template>
 			<Player>0</Player>
-			<Position x="374.67844" z="53.60836"/>
+			<Position x="375.94034" z="53.0623"/>
 			<Orientation y="-2.70324"/>
 			<Actor seed="57818"/>
 		</Entity>
 		<Entity uid="369">
 			<Template>gaia/special_treasure_food_crate</Template>
 			<Player>0</Player>
-			<Position x="369.35163" z="50.09263"/>
+			<Position x="371.33039" z="49.5982"/>
 			<Orientation y="-3.0898"/>
 			<Actor seed="20424"/>
 		</Entity>
 		<Entity uid="370">
 			<Template>gaia/special_treasure_food_crate</Template>
 			<Player>0</Player>
-			<Position x="367.27106" z="49.00342"/>
+			<Position x="367.26694" z="47.63946"/>
 			<Orientation y="2.35621"/>
 			<Actor seed="33688"/>
 		</Entity>
 		<Entity uid="371">
 			<Template>gaia/special_treasure_food_crate</Template>
 			<Player>0</Player>
-			<Position x="369.1973" z="47.98411"/>
+			<Position x="370.24488" z="47.22889"/>
 			<Orientation y="2.35621"/>
 			<Actor seed="60114"/>
 		</Entity>
 		<Entity uid="372">
 			<Template>gaia/special_treasure_food_barrel</Template>
 			<Player>0</Player>
-			<Position x="364.96515" z="48.14423"/>
-			<Orientation y="2.35621"/>
+			<Position x="364.52775" z="47.41015"/>
+			<Orientation y="2.36321"/>
 			<Actor seed="50372"/>
 		</Entity>
 		<Entity uid="374">
 			<Template>other/table_rectangle</Template>
 			<Player>0</Player>
-			<Position x="374.24228" z="77.00387"/>
+			<Position x="375.79383" z="78.28399"/>
 			<Orientation y="2.35621"/>
 			<Actor seed="49090"/>
 		</Entity>
@@ -2319,13 +2318,6 @@
 			<Position x="103.8706" z="445.01325"/>
 			<Orientation y="2.35621"/>
 			<Actor seed="52558"/>
-		</Entity>
-		<Entity uid="425">
-			<Template>structures/brit_defense_tower</Template>
-			<Player>3</Player>
-			<Position x="357.57502" z="63.39803"/>
-			<Orientation y="-0.74056"/>
-			<Actor seed="2072"/>
 		</Entity>
 		<Entity uid="426">
 			<Template>structures/gaul_farmstead</Template>
@@ -3222,6 +3214,13 @@
 			<Position x="134.7014" z="374.47196"/>
 			<Orientation y="-1.23217"/>
 			<Actor seed="56506"/>
+		</Entity>
+		<Entity uid="625">
+			<Template>structures/brit_fortress</Template>
+			<Player>3</Player>
+			<Position x="357.69446" z="65.48041"/>
+			<Orientation y="5.55767"/>
+			<Actor seed="1426"/>
 		</Entity>
 	</Entities>
 	<Paths/>

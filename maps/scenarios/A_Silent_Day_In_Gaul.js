@@ -76,46 +76,16 @@ function ChatNotification(sender, recipient, message) {
 
 // DEFEATCONDITIONS
 
-// modified version of the Conquest game type to allow for a cumstomized defeatcondition of Player 2 and some other niceties
-Trigger.prototype.DefeatConditionsPlayerOneAndThree = function(data) {
-	if(this.checkingConquestCriticalEntities) 
-		return;
-
-	this.checkingConquestCriticalEntities = true;
-	var PlayerIDs = [1, 3];
+Trigger.prototype.DefeatConditionsPlayerOne = function(data) {
+	var cmpPlayer = TriggerHelper.GetPlayerComponent(1);
+	if ((!cmpPlayer) || (cmpPlayer.GetState() != "active"))
+		return;	
 	
-	var cmpRangeManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_RangeManager);
-	var entities = cmpRangeManager.GetEntitiesByPlayer(3);
-
-	var cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
-	var structures = [];
-
-	// search for all defense towers structures and put the IDs in an array
-	for(var ent of entities) {
-		var template = cmpTemplateManager.GetCurrentTemplateName(ent);
-		if (template == "structures/brit_defense_tower")
-			structures.push(ent);
+	if (cmpPlayer.GetConquestCriticalEntitiesCount() == 0) {
+		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerOne");
+		this.DefeatPlayerOneMessage();
+		TriggerHelper.DefeatPlayer(1);
 	}
-
-	for(var PlayerID of PlayerIDs) {
-		// if the player is currently active but needs to be defeated,
-		// mark that player as defeated
-		var cmpPlayer = TriggerHelper.GetPlayerComponent(PlayerID);
-
-		if ((!cmpPlayer) || (cmpPlayer.GetState() != "active"))
-			continue;
-		// this additional check for the presence of of the defence tower is needed because the Defence Tower doesn't have a ConquestCritical flag 
-		if ( (PlayerID == 3) && ((structures.length == 0) && (cmpPlayer.GetConquestCriticalEntitiesCount() == 0)) ) {
-			this.DefeatPlayerThreeMessage();
-			this.DisableTrigger("OnInterval", "ObjectiveKillBandits");
-			TriggerHelper.SetPlayerWon(1);
-			TriggerHelper.DefeatPlayer(PlayerID);
-		} else if ( (PlayerID == 1) && (cmpPlayer.GetConquestCriticalEntitiesCount() == 0)) {
-			this.DefeatPlayerOneMessage();
-			TriggerHelper.DefeatPlayer(PlayerID);
-		}
-	}
-	this.checkingConquestCriticalEntities = false;
 };
 
 Trigger.prototype.DefeatConditionsPlayerTwo = function(data) {
@@ -124,9 +94,23 @@ Trigger.prototype.DefeatConditionsPlayerTwo = function(data) {
 		return;	
 	
 	if (cmpPlayer.GetPopulationCount() == 0) {
+		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo");
 		this.DefeatPlayerTwoMessage();
 		TriggerHelper.DefeatPlayer(2);
-		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo");
+	}
+};
+
+Trigger.prototype.DefeatConditionsPlayerThree = function(data) {
+	var cmpPlayer = TriggerHelper.GetPlayerComponent(3);
+	if ((!cmpPlayer) || (cmpPlayer.GetState() != "active"))
+		return;	
+	
+	if (cmpPlayer.GetConquestCriticalEntitiesCount() == 0) {
+		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerThree");
+		this.DefeatPlayerThreeMessage();
+		this.DisableTrigger("OnInterval", "ObjectiveKillBandits");
+		TriggerHelper.SetPlayerWon(1);
+		TriggerHelper.DefeatPlayer(3);
 	}
 };
 
@@ -357,7 +341,7 @@ Trigger.prototype.FlyAwayMessage = function() {
 };
 
 Trigger.prototype.ReinforcementsMessage = function() {
-	ChatNotification(1, [1], markForTranslation("Gaul Warrior: Let's teach those Bandits a lesson! Our scouts reported that there main camp is located to the south. Maybe we can find a path leading from the road to their camp. But let us build a Civil Center first!"));
+	ChatNotification(1, [1], markForTranslation("Gaul Warrior: Let's teach those Bandits a lesson! Our scouts reported that there main camp is located to the south. Maybe we can find a path leading from the road to their camp. But let us build a Civil Center first! Beware though, there are other bandit groups roaming around in these lands!"));
 };
 
 Trigger.prototype.FanaticRaidMessage = function() {
@@ -699,8 +683,9 @@ cmpTrigger.attackSizeIncrement = 2; // amount to add to the attackSize each raid
 cmpTrigger.messageTimeout = 20000;
 
 // arm a number of triggers that are required to run along side the storyline
-cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerOneAndThree", data);
+cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerOne", data);
 cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo", data);
+cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerThree", data);
 cmpTrigger.RegisterTrigger("OnPlayerCommand", "PlayerCommandHandler", data);
 cmpTrigger.DoAfterDelay(0, "InitDiplomacies", {});
 var entities = cmpTrigger.GetTriggerPoints("G");
