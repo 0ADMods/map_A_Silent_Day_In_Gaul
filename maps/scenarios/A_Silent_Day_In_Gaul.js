@@ -89,11 +89,21 @@ Trigger.prototype.DefeatConditionsPlayerOne = function(data) {
 };
 
 Trigger.prototype.DefeatConditionsPlayerTwo = function(data) {
-	var cmpPlayer = TriggerHelper.GetPlayerComponent(2);
-	if ((!cmpPlayer) || (cmpPlayer.GetState() != "active"))
-		return;	
-	
-	if (cmpPlayer.GetPopulationCount() == 0) {
+	this.playerID = 2;
+	var cmpRangeManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_RangeManager);
+	var entities = cmpRangeManager.GetEntitiesByPlayer(this.playerID);
+
+	var cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
+	var units = [];
+
+	// search for all fanatic units and put the IDs in an array
+	for(var ent of entities) {
+		var template = cmpTemplateManager.GetCurrentTemplateName(ent);
+		if (template == "units/gaul_support_healer_b")
+			units.push(ent);
+	}
+
+	if (units.length == 0) {
 		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo");
 		this.DefeatPlayerTwoMessage();
 		TriggerHelper.DefeatPlayer(2);
