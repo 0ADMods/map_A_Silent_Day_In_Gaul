@@ -3,20 +3,20 @@
 <Scenario version="5">
 	<Environment>
 		<SkySet>rain</SkySet>
-		<SunColour r="0.501961" g="0.501961" b="0.247059"/>
+		<SunColor r="0.501961" g="0.501961" b="0.247059"/>
 		<SunElevation angle="0.458739"/>
 		<SunRotation angle="-2.45754"/>
-		<TerrainAmbientColour r="0.713726" g="0.756863" b="0.811765"/>
-		<UnitsAmbientColour r="0.654902" g="0.701961" b="0.776471"/>
+		<TerrainAmbientColor r="0.713726" g="0.756863" b="0.811765"/>
+		<UnitsAmbientColor r="0.654902" g="0.701961" b="0.776471"/>
 		<Fog>
 			<FogFactor>0.00265625</FogFactor>
 			<FogThickness>0.207031</FogThickness>
-			<FogColour r="0.501961" g="0.501961" b="0.501961"/>
+			<FogColor r="0.501961" g="0.501961" b="0.501961"/>
 		</Fog>
 		<Water>
 			<WaterBody>
 				<Type>clap</Type>
-				<Colour r="0.501961" g="0.501961" b="0.337255"/>
+				<Color r="0.501961" g="0.501961" b="0.337255"/>
 				<Tint r="0.392157" g="0.501961" b="0.392157"/>
 				<Height>16.7869</Height>
 				<Waviness>1.18164</Waviness>
@@ -48,7 +48,7 @@
   "PlayerData": [
     {
       "Civ": "gaul",
-      "Colour": {
+      "Color": {
         "b": 64,
         "g": 128,
         "r": 0
@@ -77,7 +77,7 @@
     {
       "AI": "void",
       "Civ": "gaul",
-      "Colour": {
+      "Color": {
         "b": 20,
         "g": 20,
         "r": 150
@@ -88,7 +88,7 @@
     {
       "AI": "void",
       "Civ": "gaul",
-      "Colour": {
+      "Color": {
         "b": 0,
         "g": 64,
         "r": 128
@@ -99,7 +99,7 @@
     {
       "AI": "void",
       "Civ": "gaul",
-      "Colour": {
+      "Color": {
         "b": 128,
         "g": 128,
         "r": 0
