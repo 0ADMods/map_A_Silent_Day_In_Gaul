@@ -33,8 +33,8 @@
 		</Postproc>
 	</Environment>
 	<Camera>
-		<Position x="223.069" y="109.842" z="74.5147"/>
-		<Rotation angle="0.038785"/>
+		<Position x="329.799" y="128.281" z="-68.4214"/>
+		<Rotation angle="0.255873"/>
 		<Declination angle="0.610866"/>
 	</Camera>
 	<ScriptSettings><![CDATA[
@@ -46,6 +46,7 @@
   "LockTeams": true,
   "Name": "A Silent Day In Gaul",
   "PlayerData": [
+    null,
     {
       "Civ": "gaul",
       "Color": {
@@ -3215,12 +3216,26 @@
 			<Orientation y="-1.23217"/>
 			<Actor seed="56506"/>
 		</Entity>
-		<Entity uid="625">
-			<Template>structures/brit_fortress</Template>
+		<Entity uid="626">
+			<Template>structures/gaul_fortress</Template>
 			<Player>3</Player>
-			<Position x="357.69446" z="65.48041"/>
-			<Orientation y="5.55767"/>
-			<Actor seed="1426"/>
+			<Position x="358.73584" z="65.9904"/>
+			<Orientation y="-0.81012"/>
+			<Actor seed="33794"/>
+		</Entity>
+		<Entity uid="628">
+			<Template>other/palisades_rocks_fort</Template>
+			<Player>3</Player>
+			<Position x="322.78016" z="75.71499"/>
+			<Orientation y="2.16361"/>
+			<Actor seed="28382"/>
+		</Entity>
+		<Entity uid="629">
+			<Template>other/palisades_rocks_fort</Template>
+			<Player>3</Player>
+			<Position x="356.14484" z="99.46837"/>
+			<Orientation y="2.83028"/>
+			<Actor seed="33522"/>
 		</Entity>
 	</Entities>
 	<Paths/>
