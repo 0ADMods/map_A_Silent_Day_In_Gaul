@@ -140,9 +140,9 @@ Trigger.prototype.PlayerCommandHandler = function(data)
 		});
 		// Enable first objective message
 		this.RegisterTrigger("OnInterval", "ObjectiveVisitVillage", {
-			"enabled" : true,
-			"delay" : 1000, // after 1 seconds
-			"interval" : this.messageTimeout
+			"enabled": true,
+			"delay": 1000, // after 1 seconds
+			"interval": this.messageTimeout
 		});
 		break;
 	case "VisitVillageDialog":
@@ -173,9 +173,9 @@ Trigger.prototype.FarmerGather = function()
 
 	// set diplomacies
 	ProcessCommand(4, {
-		"type" : "diplomacy", 
-		"to" : "ally", 
-		"player" : 1
+		"type": "diplomacy", 
+		"to": "ally", 
+		"player": 1
 	});
 
 	var cmpPlayer = TriggerHelper.GetPlayerComponent(1);
@@ -192,26 +192,22 @@ Trigger.prototype.FarmerGather = function()
 	for(var entity of entities) 
 	{
 		if (TriggerHelper.EntityHasClass(entity, "Unit")) 
-		{
 			gatherers.push(entity);
-		}
 		if (TriggerHelper.EntityHasClass(entity, "Field")) 
-		{
 			resource.push(entity);
-		}
 	}
 
 	ProcessCommand(4, {
-		"type" : "gather", 
-		"entities" : gatherers, 
-		"target" : resource[0], 
-		"queued" : true
+		"type": "gather", 
+		"entities": gatherers, 
+		"target": resource[0], 
+		"queued": true
 	});
 
 	this.RegisterTrigger("OnInterval", "FarmerTribute", { 
-		"enabled" : true, 
-		"delay" : 10000, // after 10 seconds
-		"interval" : 30000 // every 30 seconds
+		"enabled": true, 
+		"delay": 10000, // after 10 seconds
+		"interval": 30000 // every 30 seconds
 	});
 };
 
@@ -226,9 +222,9 @@ Trigger.prototype.FarmerTribute = function()
 		return;
 
 	ProcessCommand(4, {
-		"type" : "tribute", 
-		"player" : 1, 
-		"amounts" : resource
+		"type": "tribute", 
+		"player": 1, 
+		"amounts": resource
 	});
 };
 
@@ -433,9 +429,9 @@ Trigger.prototype.VisitVillage = function()
 
 	// enable objective message
 	this.RegisterTrigger("OnInterval", "ObjectiveBuildOutpost", {
-		"enabled" : true,
-		"delay" : 1000, // after 1 second
-		"interval" : this.messageTimeout
+		"enabled": true,
+		"delay": 1000, // after 1 second
+		"interval": this.messageTimeout
 	});
 
 	this.RegisterTrigger("OnStructureBuilt", "SpawnAndAttackAlliedVillage", {"enabled" : true});
@@ -530,9 +526,9 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 	// enable objective message
 	ClearGUINotifications();
 	this.RegisterTrigger("OnInterval", "ObjectiveFleeToWest", {
-		"enabled" : true,
-		"delay" : 5000, // after 5 seconds
-		"interval" : this.messageTimeout
+		"enabled": true,
+		"delay": 5000, // after 5 seconds
+		"interval": this.messageTimeout
 	});
 };
 
@@ -542,10 +538,7 @@ Trigger.prototype.FleeToTheWest = function(data)
 	this.DisableTrigger("OnInterval", "ObjectiveFleeToWest");
 
 	this.PlayerID = 1;
-	var PlayerEntityId = QueryPlayerIDInterface(this.PlayerID);
-
-
-	var cmpTechnologyManager = Engine.QueryInterface(PlayerEntityId, IID_TechnologyManager); 
+	var cmpTechnologyManager = QueryPlayerIDInterface(this.PlayerID, IID_TechnologyManager);
 	var technames = ["phase_town_generic", "phase_city_gauls"];
 
 	for(var i = 0; i < technames.length; ++i) 
@@ -575,9 +568,9 @@ Trigger.prototype.FleeToTheWest = function(data)
 	// enable objective message
 	ClearGUINotifications();
 	this.RegisterTrigger("OnInterval", "ObjectiveKillBandits", { 
-		"enabled" : true,
-		"delay" : 1000, // after 1 second
-		"interval" : this.messageTimeout
+		"enabled": true,
+		"delay": 1000, // after 1 second
+		"interval": this.messageTimeout
 	});
 
 	this.DoAfterDelay(100000, "FanaticRaid", {}); // attack after 100 seconds
@@ -619,14 +612,14 @@ Trigger.prototype.FanaticRaid = function()
 	this.DoAfterDelay(5000, "FanaticRaidMessage", {}); // 5 seconds delay for the 'surprise-effect'
 	
 	cmpTrigger.RegisterTrigger("OnInterval", "BanditReinforcements", {
-		"delay" : 450000,
-		"interval" : Math.round(250000/this.DifficultyMultiplier) // every 8.3 minutes for easy and every 6 minutes for intermediate
+		"delay": 450000,
+		"interval": Math.round(250000/this.DifficultyMultiplier) // every 8.3 minutes for easy and every 6 minutes for intermediate
 	});
 };
 
 // check if the Bandit base needs reinforcement and issue a reinforcement army (so that the bandit army in the bandit base = Player1PopCount/2*DifficultyMultiplier)
 	// after that spawn an army that attacks towards 'A' or, if it exists, the Civil Center built by the Human player
-function SpawnBaseReinforcements() 
+function SpawnBaseReinforcements(reinforcementPoint) 
 {
 	var cmpPlayer = TriggerHelper.GetPlayerComponent(3);
 	var cmpPlayer1 = TriggerHelper.GetPlayerComponent(1);
@@ -656,7 +649,7 @@ function SpawnBaseReinforcements()
 	}
 }
 
-function SpawnAndAttack()
+function SpawnAndAttack(reinforcementPoint)
 {
 	var cmd = null;
 	var reinforcements = TriggerHelper.SpawnUnitsFromTriggerPoints(reinforcementPoint, "units/gaul_champion_fanatic", this.attackSize, this.PlayerID);
@@ -705,8 +698,6 @@ function SpawnAndAttack()
 	ProcessCommand(3, cmd);
 }
 
-
-
 Trigger.prototype.BanditReinforcements = function(data) 
 {
 	this.PlayerID = 3;
@@ -714,9 +705,9 @@ Trigger.prototype.BanditReinforcements = function(data)
 	this.attackSize = Math.round(this.attackSize + this.attackSizeIncrement);
 	this.attackSizeIncrement = (this.attackSizeIncrement * this.DifficultyMultiplier);
 
-	SpawnBaseReinforcements();
+	SpawnBaseReinforcements(reinforcementPoint);
 
-	SpawnAndAttack();
+	SpawnAndAttack(reinforcementPoint);
 
 	this.DoAfterDelay(0, "FanaticRaidMessage");
 };
