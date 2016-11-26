@@ -1,5 +1,6 @@
 // disables the territory decay (for all players)
-TerritoryDecay.prototype.Decay = function() {};
+TerritoryDecay.prototype.UpdateDecayState = function() {};
+var conquestClassFilter = "ConquestCritical";
 
 /* Triggerpoints
  * A: Spawn for Reinforcements after Red village Destroyed
@@ -12,13 +13,24 @@ TerritoryDecay.prototype.Decay = function() {};
 
 // FUNCTIONS
 
+/* Queries a Player Component from a given player
+ * @param PlayerID: the ID of the player
+ */
+
+function GetPlayerComponent(playerID) 
+{ 
+    let cmpPlayerMan = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager); 
+    return Engine.QueryInterface(cmpPlayerMan.GetPlayerByID(playerID), IID_Player); 
+};
+
 /* Add a certain amount of a given resource to a given player. The difference wit cmpPlayer.AddResources() is that it prevents resource amounts to be negative.
  * @param PlayerID: the ID of the player that receives the resources
  * @param resources: object that holds resource data. example: var resources = {"food" : 500};
  */
+
 function AddPlayerResources(PlayerID, resources) 
 {
-	var cmpPlayer = TriggerHelper.GetPlayerComponent(PlayerID);
+	var cmpPlayer = GetPlayerComponent(PlayerID);
 	for(var type in resources) {
 			if ((resources[type] < 0) && (-resources[type] > cmpPlayer.GetResourceCounts()[type]))
 				resources[type] = -cmpPlayer.GetResourceCounts()[type];
@@ -64,9 +76,85 @@ function ChatNotification(sender, recipient, message)
 
 // DEFEATCONDITIONS
 
+Trigger.prototype.HandlerOwnerShipChanged = function(msg)
+{
+	warn(uneval(msg));
+
+	if (!this.conquestDataInit || !this.conquestClassFilter)
+		return;
+
+	if (!TriggerHelper.EntityHasClass(msg.entity, this.conquestClassFilter))
+		return;
+
+
+
+	if (msg.to > 0 && this.conquestEntitiesByPlayer[msg.to])
+		this.conquestEntitiesByPlayer[msg.to].push(msg.entity);
+
+	if (msg.from == -1)
+		return;
+
+	let entities = this.conquestEntitiesByPlayer[msg.from];
+	let index = entities.indexOf(msg.entity);
+
+	// Check the victory conditions
+	
+	// player 1 
+	if(msg.from == 1) 
+	{
+		if (index >= 0)
+		{
+			entities.splice(index, 1);
+			if (!entities.length)
+			{
+			
+				TriggerHelper.DefeatPlayer(1);
+				this.DefeatPlayerOneMessage();
+			}
+		}
+	} 
+	else if (msg.from == 2) 
+	{
+		warn("We check player 2");
+		var cmpRangeManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_RangeManager);
+		var entity = cmpRangeManager.GetEntitiesByPlayer(msg.from);
+		warn(uneval(entities));
+
+		var cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
+		var units = [];
+
+		// search for all healer units and break if one is found
+		for(var ent of entity) 
+		{
+			var template = cmpTemplateManager.GetCurrentTemplateName(ent);
+			if (template == "units/gaul_support_healer_b")
+				return;
+		}
+
+		TriggerHelper.DefeatPlayer(msg.from);
+		this.DefeatPlayerTwoMessage();
+	} 
+	else // msg.from == 3
+	{
+		if (index >= 0)
+		{
+			entities.splice(index, 1);
+			if (!entities.length)
+			{
+				this.DefeatPlayerThreeMessage();
+				this.DisableTrigger("OnInterval", "ObjectiveKillBandits");
+				TriggerHelper.SetPlayerWon(1);
+				TriggerHelper.DefeatPlayer(msg.from);
+			}
+		}
+	}
+};
+
+/*
+
 Trigger.prototype.DefeatConditionsPlayerOne = function(data) 
 {
-	var cmpPlayer = TriggerHelper.GetPlayerComponent(1);
+	var cmpPlayer = GetPlayerComponent(1);
 	if (!cmpPlayer || cmpPlayer.GetState() != "active")
 		return;	
 	
@@ -102,7 +190,7 @@ Trigger.prototype.DefeatConditionsPlayerTwo = function(data)
 
 Trigger.prototype.DefeatConditionsPlayerThree = function(data) 
 {
-	var cmpPlayer = TriggerHelper.GetPlayerComponent(3);
+	var cmpPlayer = GetPlayerComponent(3);
 	if (!cmpPlayer || cmpPlayer.GetState() != "active")
 		return;	
 
@@ -114,7 +202,7 @@ Trigger.prototype.DefeatConditionsPlayerThree = function(data)
 	this.DisableTrigger("OnInterval", "ObjectiveKillBandits");
 	TriggerHelper.SetPlayerWon(1);
 	TriggerHelper.DefeatPlayer(3);
-};
+};*/
 
 // END OF DEFEATCONDITIONS
 
@@ -155,14 +243,14 @@ Trigger.prototype.PlayerCommandHandler = function(data)
 // make sure player 1 and 4 have the correct diplomacy status at the start of the game
 Trigger.prototype.InitDiplomacies = function() 
 {
-	var cmpPlayer = TriggerHelper.GetPlayerComponent(1);
+	var cmpPlayer = GetPlayerComponent(1);
 	cmpPlayer.SetNeutral(4);
 
-	cmpPlayer = TriggerHelper.GetPlayerComponent(4);
+	cmpPlayer = GetPlayerComponent(4);
 	cmpPlayer.SetNeutral(1);
 	cmpPlayer.SetAlly(3);
 
-	cmpPlayer = TriggerHelper.GetPlayerComponent(3);
+	cmpPlayer = GetPlayerComponent(3);
 	cmpPlayer.SetAlly(4);
 };
 
@@ -178,7 +266,7 @@ Trigger.prototype.FarmerGather = function()
 		"player": 1
 	});
 
-	var cmpPlayer = TriggerHelper.GetPlayerComponent(1);
+	var cmpPlayer = GetPlayerComponent(1);
 	cmpPlayer.SetAlly(4);
 
 	// find the gatherer and the field IDs and task the gatherer to the field
@@ -215,7 +303,7 @@ Trigger.prototype.FarmerTribute = function()
 {
 	// every 30 seconds the Farmer tributes all his food as long as he has more than 50
 	this.PlayerID = 4;
-	var cmpPlayer = TriggerHelper.GetPlayerComponent(this.PlayerID);
+	var cmpPlayer = GetPlayerComponent(this.PlayerID);
 
 	var resource = {"food" : cmpPlayer.GetResourceCounts()["food"]};
 	if (resource["food"] < 50)
@@ -621,8 +709,8 @@ Trigger.prototype.FanaticRaid = function()
 	// after that spawn an army that attacks towards 'A' or, if it exists, the Civil Center built by the Human player
 function SpawnBaseReinforcements(reinforcementPoint) 
 {
-	var cmpPlayer = TriggerHelper.GetPlayerComponent(3);
-	var cmpPlayer1 = TriggerHelper.GetPlayerComponent(1);
+	var cmpPlayer = GetPlayerComponent(3);
+	var cmpPlayer1 = GetPlayerComponent(1);
 	if ( (cmpPlayer1.GetPopulationCount()/2)*this.DifficultyMultiplier > cmpPlayer.GetPopulationCount()) 
 	{
 		var reinforcements = TriggerHelper.SpawnUnitsFromTriggerPoints(reinforcementPoint, "units/gaul_champion_fanatic", 
@@ -714,6 +802,8 @@ Trigger.prototype.BanditReinforcements = function(data)
 
 // END OF STORYLINE
 
+
+
 var cmpTrigger = Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger);
 
 // vars for data storage
@@ -724,10 +814,20 @@ cmpTrigger.attackSize = 4; // initial amount for Bandit reinforcements
 cmpTrigger.attackSizeIncrement = 2; // amount to add to the attackSize each raid
 cmpTrigger.messageTimeout = 20000;
 
+// vars for victory conditions
+cmpTrigger.conquestEntitiesByPlayer = {};
+cmpTrigger.conquestDataInit = false;
+cmpTrigger.conquestClassFilter = "ConquestCritical";
+cmpTrigger.DoAfterDelay(0, "ConquestStartGameCount", null);
+
+//cmpTrigger.RegisterTrigger("OnStructureBuilt", "ConquestAddStructure", {"enabled": true});
+//cmpTrigger.RegisterTrigger("OnTrainingFinished", "ConquestTrainingFinished", {"enabled": true});
+
 // arm a number of triggers that are required to run along side the storyline
-cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerOne", {"enabled": true});
-cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo", {"enabled": true});
-cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerThree", {"enabled": true});
+cmpTrigger.RegisterTrigger("OnOwnershipChanged", "HandlerOwnerShipChanged", {"enabled": true});
+//cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerOne", {"enabled": true});
+//cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo", {"enabled": true});
+//cmpTrigger.RegisterTrigger("OnOwnershipChanged", "DefeatConditionsPlayerThree", {"enabled": true});
 cmpTrigger.RegisterTrigger("OnPlayerCommand", "PlayerCommandHandler", {"enabled": true});
 cmpTrigger.DoAfterDelay(0, "InitDiplomacies", {});
 
