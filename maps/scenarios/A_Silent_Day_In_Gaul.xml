@@ -119,6 +119,7 @@
   "RevealMap": false,
   "TriggerScripts": [
     "scripts/TriggerHelper.js",
+    "scripts/ConquestCommon.js",
     "scenarios/A_Silent_Day_In_Gaul.js"
   ]
 }
