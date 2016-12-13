@@ -1,3 +1,11 @@
+// TODO:
+// - clean up send messages
+// - Fix Player 2 defeat
+// - check player 1 defeat
+// - alter position from druid and flag near tavern
+// - replace fortress with a fortress with a smaller territory radius
+
+
 // disables the territory decay (for all players)
 TerritoryDecay.prototype.UpdateDecayState = function() {};
 var conquestClassFilter = "ConquestCritical";
@@ -69,8 +77,9 @@ function ClearGUINotifications()
  */
 function ChatNotification(sender, recipient, message) 
 {
-	ProcessCommand(sender, {"type" : "chat", "players" : recipient, "message" : message});
+	ProcessCommand(sender, {"type" : "aichat", "players" : recipient, "message" : message});	
 }
+
 
 // END OF FUNCTIONS
 
@@ -78,15 +87,11 @@ function ChatNotification(sender, recipient, message)
 
 Trigger.prototype.HandlerOwnerShipChanged = function(msg)
 {
-	warn(uneval(msg));
-
 	if (!this.conquestDataInit || !this.conquestClassFilter)
 		return;
 
 	if (!TriggerHelper.EntityHasClass(msg.entity, this.conquestClassFilter))
 		return;
-
-
 
 	if (msg.to > 0 && this.conquestEntitiesByPlayer[msg.to])
 		this.conquestEntitiesByPlayer[msg.to].push(msg.entity);
@@ -94,7 +99,14 @@ Trigger.prototype.HandlerOwnerShipChanged = function(msg)
 	if (msg.from == -1)
 		return;
 
+	var cmpPlayer = GetPlayerComponent(msg.from);
+	if (!cmpPlayer || cmpPlayer.GetState() != "active")
+		return;	
+
 	let entities = this.conquestEntitiesByPlayer[msg.from];
+	if (!entities)
+		return;
+
 	let index = entities.indexOf(msg.entity);
 
 	// Check the victory conditions
@@ -115,10 +127,8 @@ Trigger.prototype.HandlerOwnerShipChanged = function(msg)
 	} 
 	else if (msg.from == 2) 
 	{
-		warn("We check player 2");
 		var cmpRangeManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_RangeManager);
 		var entity = cmpRangeManager.GetEntitiesByPlayer(msg.from);
-		warn(uneval(entities));
 
 		var cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
 		var units = [];
@@ -406,7 +416,7 @@ Trigger.prototype.VisitVillageDialog = function()
 
 Trigger.prototype.VisitVillageMessage = function()
  {
-	ChatNotification(2, [1], markForTranslation("Elder: Very good! I love that eagerness! I have a task for you: I need you to rebuild the old Outpost to the West of here. We need it to signal to other tribes. Good luck."));
+	ChatNotification(2, [2], markForTranslation("Elder: Very good! I love that eagerness! I have a task for you: I need you to rebuild the old Outpost to the West of here. We need it to signal to other tribes. Good luck."));
 	
 	// add resources required to build an Outpost
 	AddPlayerResources(1, { "wood": 80 });
@@ -419,17 +429,17 @@ Trigger.prototype.BuildOutpostMessage = function()
 
 Trigger.prototype.BuildOutpostWrongTypeMessage = function() 
 {
-	ChatNotification(2, [1], markForTranslation("Elder: Aren't you even capable of building an outpost!? Shame on you, go and return to your father!"));
+	ChatNotification(2, [2], markForTranslation("Elder: Aren't you even capable of building an outpost!? Shame on you, go and return to your father!"));
 };
 
 Trigger.prototype.BuildOutpostWrongPlaceMessage = function() 
 {
-	ChatNotification(2, [1], markForTranslation("Elder: How can we use this outpost if you didn't build it at the right place? Go and return to your father, I can't teach you anything!"));
+	ChatNotification(2, [2], markForTranslation("Elder: How can we use this outpost if you didn't build it at the right place? Go and return to your father, I can't teach you anything!"));
 };
 
 Trigger.prototype.FlyAwayMessage = function() 
 {
-	ChatNotification(2, [1], markForTranslation("Elder: Bandits are attacking our village! Follow the road back to the West, the way you came from! You won't survive a minute!"));
+	ChatNotification(2, [2], markForTranslation("Elder: Bandits are attacking our village! Follow the road back to the West, the way you came from! You won't survive a minute!"));
 };
 
 Trigger.prototype.ReinforcementsMessage = function() 
@@ -444,7 +454,7 @@ Trigger.prototype.FanaticRaidMessage = function()
 
 Trigger.prototype.FarmerMessage = function() 
 {
-	ChatNotification(4, [1], markForTranslation("You're not one of those bandits, eh? They took my wife and children and ruined my life. I'll help you by giving you the harvest of my farm."));
+	ChatNotification(4, [4], markForTranslation("You're not one of those bandits, eh? They took my wife and children and ruined my life. I'll help you by giving you the harvest of my farm."));
 };
 
 Trigger.prototype.TreasureFoundMessage = function() 
@@ -459,7 +469,7 @@ Trigger.prototype.DefeatPlayerOneMessage = function()
 
 Trigger.prototype.DefeatPlayerTwoMessage = function() 
 {
-	ChatNotification(2, [1], markForTranslation("We have been slain! Avenge us!"));
+	ChatNotification(2, [2], markForTranslation("We have been slain! Avenge us!"));
 };
 
 Trigger.prototype.DefeatPlayerThreeMessage = function() 
@@ -491,6 +501,7 @@ Trigger.prototype.ObjectiveKillBandits = function()
 // End of Objective messages
 
 // END OF MESSAGES AND DIALOGUES
+
 
 // STORYLINE (IN SEQUENCE)
 
@@ -552,9 +563,7 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 	{
 		this.BuildOutpostWrongTypeMessage();
 		// disable defeat conditions
-		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerOne");
-		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo");
-		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerThree");
+		this.DisableTrigger("OnOwnershipChanged", "HandlerOwnerShipChanged");
 		
 		TriggerHelper.DefeatPlayer(1);
 		return;
@@ -564,9 +573,7 @@ Trigger.prototype.SpawnAndAttackAlliedVillage = function(data) {
 	{
 		this.BuildOutpostWrongPlaceMessage();
 		// disable defeat conditions
-		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerOne");
-		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerTwo");
-		this.DisableTrigger("OnOwnershipChanged", "DefeatConditionsPlayerThree");
+		this.DisableTrigger("OnOwnershipChanged", "HandlerOwnerShipChanged");
 
 		TriggerHelper.DefeatPlayer(1);
 		return;
@@ -627,7 +634,7 @@ Trigger.prototype.FleeToTheWest = function(data)
 
 	this.PlayerID = 1;
 	var cmpTechnologyManager = QueryPlayerIDInterface(this.PlayerID, IID_TechnologyManager);
-	var technames = ["phase_town_generic", "phase_city_gauls"];
+	var technames = ["phase_town", "phase_city"];
 
 	for(var i = 0; i < technames.length; ++i) 
 	{
