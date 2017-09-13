@@ -1344,35 +1344,35 @@
 			<Actor seed="40286"/>
 		</Entity>
 		<Entity uid="215">
-			<Template>special/trigger_point_A</Template>
+			<Template>trigger/trigger_point_A</Template>
 			<Player>0</Player>
 			<Position x="66.90159" z="106.98208"/>
 			<Orientation y="2.35621"/>
 			<Actor seed="7018"/>
 		</Entity>
 		<Entity uid="216">
-			<Template>special/trigger_point_B</Template>
+			<Template>trigger/trigger_point_B</Template>
 			<Player>0</Player>
 			<Position x="384.05793" z="217.80124"/>
 			<Orientation y="2.35621"/>
 			<Actor seed="29806"/>
 		</Entity>
 		<Entity uid="217">
-			<Template>special/trigger_point_C</Template>
+			<Template>trigger/trigger_point_C</Template>
 			<Player>0</Player>
 			<Position x="139.03849" z="460.39591"/>
 			<Orientation y="0.36161"/>
 			<Actor seed="25116"/>
 		</Entity>
 		<Entity uid="219">
-			<Template>special/trigger_point_D</Template>
+			<Template>trigger/trigger_point_D</Template>
 			<Player>0</Player>
 			<Position x="359.02637" z="69.32705"/>
 			<Orientation y="2.35621"/>
 			<Actor seed="45254"/>
 		</Entity>
 		<Entity uid="220">
-			<Template>special/trigger_point_E</Template>
+			<Template>trigger/trigger_point_E</Template>
 			<Player>0</Player>
 			<Position x="148.906" z="221.45752"/>
 			<Orientation y="0.49099"/>
@@ -1618,7 +1618,7 @@
 			<Orientation y="2.35621"/>
 		</Entity>
 		<Entity uid="266">
-			<Template>special/trigger_point_F</Template>
+			<Template>trigger/trigger_point_F</Template>
 			<Player>0</Player>
 			<Position x="466.29545" z="129.9978"/>
 			<Orientation y="2.35621"/>
@@ -2350,7 +2350,7 @@
 			<Actor seed="2886"/>
 		</Entity>
 		<Entity uid="435">
-			<Template>special/trigger_point_G</Template>
+			<Template>trigger/trigger_point_G</Template>
 			<Player>0</Player>
 			<Position x="83.16321" z="386.97818"/>
 			<Orientation y="2.20957"/>
@@ -2483,7 +2483,7 @@
 			<Actor seed="13054"/>
 		</Entity>
 		<Entity uid="456">
-			<Template>special/trigger_point_H</Template>
+			<Template>trigger/trigger_point_H</Template>
 			<Player>0</Player>
 			<Position x="397.83756" z="415.08561"/>
 			<Orientation y="0.6461"/>
